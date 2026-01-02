@@ -205,8 +205,10 @@ print('✓ Shape generation complete!')
         temp_mesh = self.data_dir / "temp_mesh.obj"
         
         # Python script to run inside container
+        # Note: paint_pipeline returns a file path string, not a mesh object
         python_script = f"""
 import sys
+import shutil
 sys.path.insert(0, './hy3dshape')
 sys.path.insert(0, './hy3dpaint')
 from hy3dshape.pipelines import Hunyuan3DDiTFlowMatchingPipeline
@@ -220,8 +222,17 @@ mesh_untextured.export('/data/temp_mesh.obj')
 print('[2/2] Generating texture (this takes a while)...')
 paint_config = Hunyuan3DPaintConfig(max_num_view={max_views}, resolution={resolution})
 paint_pipeline = Hunyuan3DPaintPipeline(paint_config)
-mesh_textured = paint_pipeline('/data/temp_mesh.obj', image_path='/data/input.png')
-mesh_textured.export('/data/output_textured.glb')
+output_path = paint_pipeline('/data/temp_mesh.obj', image_path='/data/input.png')
+
+print(f'Texture generation output: {{output_path}}')
+
+# The pipeline outputs to a default location, copy it to our desired location
+if isinstance(output_path, str):
+    print(f'Copying from {{output_path}} to /data/output_textured.glb')
+    shutil.copy2(output_path, '/data/output_textured.glb')
+else:
+    print('Exporting textured mesh...')
+    output_path.export('/data/output_textured.glb')
 
 print('✓ Full textured model generation complete!')
 """
@@ -261,6 +272,14 @@ print('✓ Full textured model generation complete!')
                 print(f"✓ SUCCESS! Textured model saved to: {output_file}")
                 if temp_mesh.exists():
                     print(f"ℹ Intermediate mesh saved to: {temp_mesh}")
+                
+                # Check for additional texture files
+                texture_files = list(self.data_dir.glob("textured_mesh*"))
+                if texture_files:
+                    print(f"ℹ Additional texture files generated:")
+                    for tf in texture_files:
+                        print(f"  - {tf.name}")
+                
                 print(f"{'='*60}\n")
                 return output_file
             else:
@@ -272,7 +291,7 @@ print('✓ Full textured model generation complete!')
                 print(e.stderr)
             raise
     
-    def run(self, input_image_path, mode="shape", verbose=True, max_views=6, resolution=512):
+    def run(self, input_image_path, mode="shape", verbose=True, max_views=6, resolution=512, fallback=True):
         """
         Complete pipeline: setup, copy image, generate mesh
         
@@ -282,6 +301,7 @@ print('✓ Full textured model generation complete!')
             verbose: Print detailed output
             max_views: Number of views for texture (only for textured mode)
             resolution: Texture resolution (only for textured mode)
+            fallback: If True, fall back to shape-only if textured fails
             
         Returns:
             Path to output .glb file
@@ -312,11 +332,21 @@ print('✓ Full textured model generation complete!')
         if mode == "shape":
             output_file = self.generate_shape_only(verbose=verbose)
         elif mode == "textured":
-            output_file = self.generate_full_textured(
-                verbose=verbose,
-                max_views=max_views,
-                resolution=resolution
-            )
+            try:
+                output_file = self.generate_full_textured(
+                    verbose=verbose,
+                    max_views=max_views,
+                    resolution=resolution
+                )
+            except Exception as e:
+                if fallback:
+                    print(f"\n⚠️  Textured pipeline failed: {str(e)[:100]}")
+                    print("🔄 Falling back to shape-only generation...")
+                    output_file = self.generate_shape_only(verbose=verbose)
+                    print("\n⚠️  Note: Texture generation failed. Your Docker image may need fixing.")
+                    print("   Fix: Rebuild with updated torchvision (pip install --upgrade torchvision)")
+                else:
+                    raise
         else:
             raise ValueError(f"Invalid mode: {mode}. Use 'shape' or 'textured'")
         
@@ -380,6 +410,11 @@ Examples:
         help="Texture resolution (default: 512, only for --textured)"
     )
     parser.add_argument(
+        "--no-fallback",
+        action="store_true",
+        help="Don't fall back to shape-only if textured mode fails"
+    )
+    parser.add_argument(
         "-q", "--quiet",
         action="store_true",
         help="Suppress detailed output"
@@ -438,7 +473,8 @@ Examples:
             mode=mode,
             verbose=not args.quiet,
             max_views=args.views,
-            resolution=args.resolution
+            resolution=args.resolution,
+            fallback=not args.no_fallback
         )
         print(f"\n✅ Pipeline completed successfully!")
         print(f"📦 Output: {output_file}")
