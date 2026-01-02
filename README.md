@@ -256,40 +256,119 @@ This launches a dedicated Qwen Image Edit Plus interface.
 
 ### Hunyuan 3D Runner (Direct 3D Generation)
 
-Generate 3D assets directly from images using the `hunyuan3d_runner.py` script. This is useful for batch processing or direct command-line usage.
+Generate 3D assets directly from images using the `hunyuan3d_runner.py` script. This is useful for batch processing or direct command-line usage. The runner supports both shape-only generation (fast) and full textured models (slower but higher quality).
 
 #### Basic Usage
 
 ```bash
-# Test the setup first
-python hunyuan3d_runner.py ~/Pictures/my_image.png -d feynmann_custom:v1 --test
+# Test the setup first (checks Docker, GPU, and image existence)
+python hunyuan3d_runner.py ~/Pictures/my_image.png -d your_username/hunyuan3d:latest --test
 
-# Run the 3D generation
-python hunyuan3d_runner.py ~/Pictures/my_image.png -d feynmann_custom:v1 
+# Generate shape only (fast)
+python hunyuan3d_runner.py ~/Pictures/my_image.png -d your_username/hunyuan3d:latest
+
+# Generate full textured model (high quality, takes longer)
+python hunyuan3d_runner.py ~/Pictures/my_image.png -d your_username/hunyuan3d:latest --textured
 ```
 
 #### Command-Line Options
 
-- `image_path`: Path to input image (PNG, JPG, JPEG)
-- `-d, --docker-image`: Docker image name (optional, defaults to Lightning AI API)
-- `--test`: Run in test mode before full processing
-- Other available flags: See `python hunyuan3d_runner.py --help`
+- `input_image`: Path to input image (PNG, JPG, JPEG) - **Required**
+- `-d, --docker-image`: Docker image name (default: `your_username/hunyuan3d:latest`)
+- `-o, --output-dir`: Output directory for generated files (default: `~/hunyuan_data`)
+- `--textured`: Generate full textured 3D model (slower but higher quality)
+- `--views`: Number of views for texture generation (default: 6, only for `--textured`)
+- `--resolution`: Texture resolution in pixels (default: 512, only for `--textured`)
+- `-q, --quiet`: Suppress detailed output
+- `--test`: Run pre-flight checks only without generating mesh
 
-#### Output
+#### Pre-flight Checks
 
-The generated 3D model will be saved at: `~/hunyuan_data/output_shape.glb`
+The runner automatically performs the following checks before generation:
+- **Docker Availability**: Verifies Docker is installed
+- **NVIDIA GPU**: Checks for GPU availability (warns if not found)
+- **Docker Image**: Checks if image exists locally or attempts to pull from Docker Hub
+- **Data Directory**: Creates output directory if needed
+- **Input Image**: Verifies input image exists
 
-#### Example Workflow
+#### Modes
+
+**Shape Only** (Default - ~2-5 minutes)
+```bash
+python hunyuan3d_runner.py image.png -d user/hunyuan3d:latest
+```
+Generates: `~/hunyuan_data/output_shape.glb`
+
+**Full Textured** (Slower - ~15-30 minutes depending on settings)
+```bash
+python hunyuan3d_runner.py image.png -d user/hunyuan3d:latest --textured --views 6 --resolution 512
+```
+Generates: 
+- `~/hunyuan_data/output_textured.glb` (final textured model)
+- `~/hunyuan_data/temp_mesh.obj` (intermediate untextured mesh)
+
+#### Complete Example Workflow
 
 ```bash
-# Step 1: Test the installation
+# Step 1: Test the installation before running
 python hunyuan3d_runner.py ~/Pictures/my_image.png -d john_doe/hunyuan3d:latest --test
 
-# Step 2: If test passes, run the full generation
+# Step 2: If test passes, run fast shape generation
 python hunyuan3d_runner.py ~/Pictures/my_image.png -d john_doe/hunyuan3d:latest
 
-# Step 3: Check the output
-ls ~/hunyuan_data/output_shape.glb
+# Step 3: For better quality, generate textured version
+python hunyuan3d_runner.py ~/Pictures/my_image.png -d john_doe/hunyuan3d:latest --textured --views 8 --resolution 1024
+
+# Step 4: Check the outputs
+ls ~/hunyuan_data/output_*.glb
+```
+
+#### Output Files
+
+- **Shape only mode**: `~/hunyuan_data/output_shape.glb`
+- **Textured mode**: 
+  - Final model: `~/hunyuan_data/output_textured.glb`
+  - Intermediate: `~/hunyuan_data/temp_mesh.obj`
+
+#### Advanced Options
+
+```bash
+# Custom output directory
+python hunyuan3d_runner.py image.png -d user/hunyuan3d:latest -o ./my_outputs
+
+# High-quality textured with more views
+python hunyuan3d_runner.py image.png -d user/hunyuan3d:latest --textured --views 12 --resolution 2048
+
+# Quiet mode (minimal output)
+python hunyuan3d_runner.py image.png -d user/hunyuan3d:latest -q
+```
+
+#### Python API Usage
+
+```python
+from hunyuan3d_runner import Hunyuan3DRunner
+
+# Initialize runner
+runner = Hunyuan3DRunner(
+    docker_image="user/hunyuan3d:latest",
+    data_dir="~/hunyuan_data"
+)
+
+# Generate shape only
+output = runner.run(
+    input_image_path="input.png",
+    mode="shape",
+    verbose=True
+)
+
+# Generate with texture
+output = runner.run(
+    input_image_path="input.png",
+    mode="textured",
+    verbose=True,
+    max_views=8,
+    resolution=1024
+)
 ```
 
 ### Integrated Pipeline (Recommended)
