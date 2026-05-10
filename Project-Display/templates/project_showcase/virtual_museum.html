@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Virtual Museum</h1>
+    <p>Explore our 3D models below. Click and drag to interact with each model.</p>
+    <div id="museum-gallery" class="row">
+        {% for art in artifacts %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-0">
+                    <model-viewer
+                        src="{% if art.is_user_generated %}{{ art.best_glb }}{% else %}{% static art.best_glb %}{% endif %}"
+                        alt="{{ art.name }}" auto-rotate camera-controls
+                        style="width: 100%; height: 350px; background-color: #f8f9fa;">
+                    </model-viewer>
+                </div>
+                <div class="card-footer text-center bg-white border-0 pt-3 pb-3 position-relative">
+                    <h5 class="mb-1">{{ art.name }}</h5>
+                    {% if art.is_user_generated %}
+                    <button class="btn btn-sm btn-outline-danger position-absolute"
+                        style="top: 10px; right: 10px; border-radius: 50%; width: 26px; height: 26px; padding: 0; line-height: 1; z-index: 10;"
+                        onclick="deleteAsset('{{ art.session_id }}')" title="Delete Asset">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <span class="badge bg-success mb-2 mt-1">Live Cloud Generation</span>
+                    {% else %}
+                    <span class="badge bg-primary mb-2 mt-1">Preserved Museum Artifact</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No 3D artifacts found in the system yet.</h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<!-- model-viewer web component -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script>
+    async function deleteAsset(sessionId) {
+        if (!confirm('Are you sure you want to permanently delete this generated artifact?')) return;
+
+        try {
+            const response = await fetch(`/api/delete/${sessionId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                location.reload(); // Instantly wipe from display
+            } else {
+                alert('Failed to delete asset locally: ' + data.error);
+            }
+        } catch (e) {
+            alert('Server mapping error during deletion securely.');
+        }
+    }
+</script>
+{% endblock %}

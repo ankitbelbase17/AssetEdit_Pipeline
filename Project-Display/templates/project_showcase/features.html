@@ -1,0 +1,477 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Features & Modules | Single Image 3D Reconstruction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">Features & Modules</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Features</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Features Overview -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Core Capabilities</span>
+            <h2 class="section-title">Main Features</h2>
+            <p class="section-subtitle">
+                Comprehensive 3D reconstruction and editing capabilities in one integrated framework
+            </p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-detail-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h4>Single Image Input</h4>
+                    <p>
+                        Generate complete 3D models from just one 2D photograph. No need for 
+                        multiple camera views, depth sensors, or specialized equipment.
+                    </p>
+                    <ul class="feature-highlights">
+                        <li><i class="fas fa-check"></i> Any single RGB image</li>
+                        <li><i class="fas fa-check"></i> No calibration required</li>
+                        <li><i class="fas fa-check"></i> Works on diverse subjects</li>
+                        <li><i class="fas fa-check"></i> Mobile-friendly input</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-detail-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <h4>3D Gaussian Splatting</h4>
+                    <p>
+                        State-of-the-art 3D representation using millions of optimized Gaussian 
+                        ellipsoids for photorealistic rendering at real-time speeds.
+                    </p>
+                    <ul class="feature-highlights">
+                        <li><i class="fas fa-check"></i> Real-time 1080p rendering</li>
+                        <li><i class="fas fa-check"></i> 70% faster than NeRF</li>
+                        <li><i class="fas fa-check"></i> High visual fidelity</li>
+                        <li><i class="fas fa-check"></i> Efficient memory usage</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-detail-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>Diffusion-Based Priors</h4>
+                    <p>
+                        Leverage powerful 2D diffusion models to hallucinate unseen geometry 
+                        and ensure consistent novel view synthesis.
+                    </p>
+                    <ul class="feature-highlights">
+                        <li><i class="fas fa-check"></i> Pretrained model priors</li>
+                        <li><i class="fas fa-check"></i> View-consistent generation</li>
+                        <li><i class="fas fa-check"></i> Score distillation sampling</li>
+                        <li><i class="fas fa-check"></i> Camera conditioning</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-detail-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h4>Monocular Depth Estimation</h4>
+                    <p>
+                        Deep learning-based depth prediction provides geometric initialization 
+                        for faster convergence and more accurate reconstructions.
+                    </p>
+                    <ul class="feature-highlights">
+                        <li><i class="fas fa-check"></i> Dense depth maps</li>
+                        <li><i class="fas fa-check"></i> Surface normal prediction</li>
+                        <li><i class="fas fa-check"></i> 20% faster convergence</li>
+                        <li><i class="fas fa-check"></i> Better initialization</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-detail-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4>Feedforward 3D Editing</h4>
+                    <p>
+                        Rapidly generate and edit 3D assets through natural language instructions 
+                        using the Qwen2509 + Hunyuan3D pipeline.
+                    </p>
+                    <ul class="feature-highlights">
+                        <li><i class="fas fa-check"></i> 25-second generation</li>
+                        <li><i class="fas fa-check"></i> Text-to-3D creation</li>
+                        <li><i class="fas fa-check"></i> Image-to-3D conversion</li>
+                        <li><i class="fas fa-check"></i> Natural language editing</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="feature-detail-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h4>Multi-View Consistency</h4>
+                    <p>
+                        Camera-conditioned optimization ensures geometric consistency across 
+                        all virtual viewpoints, eliminating the Janus problem.
+                    </p>
+                    <ul class="feature-highlights">
+                        <li><i class="fas fa-check"></i> Viewpoint-aware SDS</li>
+                        <li><i class="fas fa-check"></i> No Janus artifacts</li>
+                        <li><i class="fas fa-check"></i> 360° consistency</li>
+                        <li><i class="fas fa-check"></i> Accurate geometry</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reconstruction Pipeline Features -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Reconstruction</span>
+            <h2 class="section-title">Reconstruction Pipeline Features</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="module-card">
+                    <div class="module-header">
+                        <i class="fas fa-cloud text-primary"></i>
+                        <h4>Point Cloud Generation</h4>
+                    </div>
+                    <div class="module-body">
+                        <p>
+                            Generate dense 3D point clouds from single images using importance sampling 
+                            that concentrates points in geometrically significant regions.
+                        </p>
+                        <div class="module-features">
+                            <div class="module-feature">
+                                <strong>Importance Sampling:</strong> 
+                                Stratified sampling based on depth and surface curvature
+                            </div>
+                            <div class="module-feature">
+                                <strong>KNN Refinement:</strong> 
+                                K-Nearest Neighbors for outlier removal and density optimization
+                            </div>
+                            <div class="module-feature">
+                                <strong>Curvature-Based:</strong> 
+                                Alternative sampling approach for smooth surfaces
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="module-card">
+                    <div class="module-header">
+                        <i class="fas fa-cogs text-primary"></i>
+                        <h4>Score Distillation Sampling</h4>
+                    </div>
+                    <div class="module-body">
+                        <p>
+                            Optimize 3D representations using gradients from pretrained 2D diffusion 
+                            models, enabling generation of unseen viewpoints.
+                        </p>
+                        <div class="module-features">
+                            <div class="module-feature">
+                                <strong>Camera Conditioning:</strong> 
+                                Explicit viewpoint awareness to reduce artifacts
+                            </div>
+                            <div class="module-feature">
+                                <strong>Gradient-Based:</strong> 
+                                Efficient optimization through differentiable rendering
+                            </div>
+                            <div class="module-feature">
+                                <strong>Noise Scheduling:</strong> 
+                                Adaptive noise levels for stable convergence
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="module-card">
+                    <div class="module-header">
+                        <i class="fas fa-vector-square text-primary"></i>
+                        <h4>Gaussian Representation</h4>
+                    </div>
+                    <div class="module-body">
+                        <p>
+                            Represent 3D scenes using anisotropic Gaussian ellipsoids with 
+                            learnable parameters for position, shape, opacity, and color.
+                        </p>
+                        <div class="module-features">
+                            <div class="module-feature">
+                                <strong>Anisotropic Gaussians:</strong> 
+                                3D ellipsoids with full covariance matrices
+                            </div>
+                            <div class="module-feature">
+                                <strong>Spherical Harmonics:</strong> 
+                                View-dependent color representation
+                            </div>
+                            <div class="module-feature">
+                                <strong>Adaptive Density:</strong> 
+                                Dynamic splitting and pruning of Gaussians
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="module-card">
+                    <div class="module-header">
+                        <i class="fas fa-cube text-primary"></i>
+                        <h4>Mesh Extraction & Export</h4>
+                    </div>
+                    <div class="module-body">
+                        <p>
+                            Convert optimized Gaussian representations to standard mesh formats 
+                            with baked textures for use in external applications.
+                        </p>
+                        <div class="module-features">
+                            <div class="module-feature">
+                                <strong>Marching Cubes:</strong> 
+                                Isosurface extraction from density fields
+                            </div>
+                            <div class="module-feature">
+                                <strong>Texture Baking:</strong> 
+                                UV mapping and texture generation
+                            </div>
+                            <div class="module-feature">
+                                <strong>Multiple Formats:</strong> 
+                                OBJ, GLB, PLY export support
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Editing Pipeline Features -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Editing</span>
+            <h2 class="section-title">Feedforward Editing Features</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="editing-feature-card">
+                    <div class="ef-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div class="ef-content">
+                        <h4>Natural Language Instructions</h4>
+                        <p>
+                            Describe desired 3D assets or edits using plain English. Qwen2509 parses 
+                            instructions and generates structured prompts for the 3D generator.
+                        </p>
+                        <div class="ef-examples">
+                            <span class="example-prompt">"Create a red sports car"</span>
+                            <span class="example-prompt">"Add wings to the statue"</span>
+                            <span class="example-prompt">"Make it look metallic"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="editing-feature-card">
+                    <div class="ef-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="ef-content">
+                        <h4>Image-to-3D Conversion</h4>
+                        <p>
+                            Upload a reference image and automatically generate a corresponding 
+                            3D model that captures the object's shape and appearance.
+                        </p>
+                        <div class="ef-examples">
+                            <span class="example-prompt">Product photography → 3D model</span>
+                            <span class="example-prompt">Artwork → 3D sculpture</span>
+                            <span class="example-prompt">Photo → Digital twin</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="editing-feature-card">
+                    <div class="ef-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="ef-content">
+                        <h4>Rapid Generation (25 seconds)</h4>
+                        <p>
+                            Complete 3D asset generation in approximately 25 seconds, 108× faster 
+                            than optimization-based methods like SPARC3D.
+                        </p>
+                        <div class="ef-stats">
+                            <div class="ef-stat">
+                                <strong>25s</strong>
+                                <span>Average Time</span>
+                            </div>
+                            <div class="ef-stat">
+                                <strong>108×</strong>
+                                <span>Speed Improvement</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="editing-feature-card">
+                    <div class="ef-icon">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                    <div class="ef-content">
+                        <h4>Perfect View Consistency</h4>
+                        <p>
+                            Single-pass generation ensures absolute geometric coherence across all 
+                            viewpoints, eliminating multi-view reconstruction artifacts.
+                        </p>
+                        <div class="ef-benefits">
+                            <span class="benefit-tag">No Janus Effect</span>
+                            <span class="benefit-tag">360° Coherent</span>
+                            <span class="benefit-tag">Clean Geometry</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison Table -->
+<section class="section-padding bg-dark text-white">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Comparison</span>
+            <h2 class="section-title text-white">Pipeline Comparison</h2>
+        </div>
+        
+        <div class="table-responsive" data-aos="fade-up">
+            <table class="table table-dark comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Optimization Pipeline</th>
+                        <th>Feedforward Pipeline</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Generation Time</strong></td>
+                        <td>45+ minutes</td>
+                        <td class="highlight">25 seconds</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Detail Quality</strong></td>
+                        <td class="highlight">Very High</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td><strong>View Consistency</strong></td>
+                        <td>Very High (with camera cond.)</td>
+                        <td class="highlight">Perfect (direct 3D)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interactive Editing</strong></td>
+                        <td>Limited (requires re-optimization)</td>
+                        <td class="highlight">Yes (rapid iteration)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Text Guidance</strong></td>
+                        <td>Supported</td>
+                        <td class="highlight">Native support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory Usage</strong></td>
+                        <td>Moderate (during optimization)</td>
+                        <td>High (model loading)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best For</strong></td>
+                        <td>Final quality renders</td>
+                        <td class="highlight">Rapid prototyping</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Use Cases -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Applications</span>
+            <h2 class="section-title">Use Cases</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="use-case-card">
+                    <i class="fas fa-vr-cardboard"></i>
+                    <h5>AR/VR Content</h5>
+                    <p>Create immersive 3D experiences from photos for augmented and virtual reality applications.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="use-case-card">
+                    <i class="fas fa-landmark"></i>
+                    <h5>Digital Heritage</h5>
+                    <p>Preserve cultural artifacts, monuments, and historical objects in detailed 3D digital archives.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="use-case-card">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h5>E-Commerce</h5>
+                    <p>Generate interactive 3D product visualizations from simple product photography.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="use-case-card">
+                    <i class="fas fa-gamepad"></i>
+                    <h5>Game Development</h5>
+                    <p>Rapid 3D asset creation for game environments, characters, and props.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

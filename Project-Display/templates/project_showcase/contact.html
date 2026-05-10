@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us | Single Image 3D Reconstruction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">Contact Us</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Contact</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Contact Form -->
+            <div class="col-lg-7" data-aos="fade-right">
+                <div class="contact-form-wrapper">
+                    <h3 class="mb-4">Send us a Message</h3>
+                    <p class="text-muted mb-4">
+                        Have questions about our project? Want to collaborate or learn more? 
+                        Fill out the form below and we'll get back to you soon.
+                    </p>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" action="{% url 'project_showcase:contact' %}" id="contactForm">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_name" class="form-label">Full Name *</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_email" class="form-label">Email Address *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_subject" class="form-label">Subject *</label>
+                                {{ form.subject }}
+                                {% if form.subject.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.subject.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_message" class="form-label">Message *</label>
+                                {{ form.message }}
+                                {% if form.message.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.message.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="col-lg-5" data-aos="fade-left">
+                <div class="contact-info-wrapper">
+                    <h3 class="mb-4">Contact Information</h3>
+                    
+                    <div class="contact-info-card">
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h5>Institution</h5>
+                                <p>Tribhuvan University<br>
+                                Institute of Engineering<br>
+                                Pulchowk Campus</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h5>Department</h5>
+                                <p>Department of Electronics and<br>Computer Engineering</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h5>Address</h5>
+                                <p>Pulchowk, Lalitpur<br>Nepal</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h5>Email</h5>
+                                <p>info@ioe.edu.np</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Members Quick Contact -->
+                    <div class="team-quick-contact mt-4">
+                        <h5>Project Team</h5>
+                        <div class="team-mini-cards">
+                            {% if team_members %}
+                                {% for member in team_members %}
+                                <div class="team-mini-card">
+                                    <span class="member-name">{{ member.name }}</span>
+                                    <span class="member-roll">{{ member.roll_number }}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="team-mini-card">
+                                    <span class="member-name">Anish Bishwakarma</span>
+                                    <span class="member-roll">PUL078BCT011</span>
+                                </div>
+                                <div class="team-mini-card">
+                                    <span class="member-name">Ankit Belbase</span>
+                                    <span class="member-roll">PUL078BCT013</span>
+                                </div>
+                                <div class="team-mini-card">
+                                    <span class="member-name">Dipan Bartaula</span>
+                                    <span class="member-roll">PUL078BCT040</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Supervisor -->
+                    <div class="supervisor-contact mt-4">
+                        <h5>Project Supervisor</h5>
+                        {% if supervisors %}
+                            {% for supervisor in supervisors %}
+                                {% if supervisor.role == 'Project Supervisor' %}
+                                <p class="mb-0">{{ supervisor.title }} {{ supervisor.name }}</p>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="mb-0">Assoc. Prof. Dr. Jyoti Tandukar</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section (Placeholder) -->
+<section class="map-section">
+    <div class="map-placeholder">
+        <div class="map-overlay">
+            <div class="map-content">
+                <i class="fas fa-map-marker-alt"></i>
+                <h4>IOE Pulchowk Campus</h4>
+                <p>Pulchowk, Lalitpur, Nepal</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">FAQ</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8" data-aos="fade-up">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                What is Single Image 3D Reconstruction?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Single Image 3D Reconstruction is a computer vision technique that generates 
+                                detailed three-dimensional models from a single two-dimensional photograph. 
+                                Our project uses advanced deep learning methods including diffusion models, 
+                                Gaussian splatting, and feedforward generation to achieve this.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                How long does 3D generation take?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Our feedforward pipeline can generate 3D models in approximately 25 seconds. 
+                                The optimization-based pipeline takes longer (45+ minutes) but produces 
+                                higher quality results with more geometric detail.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                What hardware is required?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                For optimal performance, we recommend an NVIDIA A100 GPU with 40GB VRAM. 
+                                However, the system can run on consumer GPUs like RTX 3090/4090 with 
+                                reduced batch sizes. Future work includes model compression for broader accessibility.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Can I try the system?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                The project is currently in the final development phase. A demo will be 
+                                available during the project presentation. For research collaboration 
+                                inquiries, please use the contact form above.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                What output formats are supported?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                The system supports multiple output formats including OBJ (with materials 
+                                and textures), GLB/GLTF (web-ready), PLY (point clouds), and native 
+                                Gaussian splatting format for real-time rendering.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation enhancement
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('id_name').value.trim();
+    const email = document.getElementById('id_email').value.trim();
+    const subject = document.getElementById('id_subject').value.trim();
+    const message = document.getElementById('id_message').value.trim();
+    
+    if (!name || !email || !subject || !message) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+        return false;
+    }
+    
+    if (!email.includes('@')) {
+        e.preventDefault();
+        alert('Please enter a valid email address.');
+        return false;
+    }
+    
+    if (message.length < 10) {
+        e.preventDefault();
+        alert('Message must be at least 10 characters long.');
+        return false;
+    }
+});
+</script>
+{% endblock %}

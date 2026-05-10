@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+local_settings.py
+
+# Assets (Excluded as per user request to avoid pushing heavy files)
+static/museum_assets/
+BG_removed_output/
+BG_removed_ouptuts_hunyuan/
+
+# Virtual Environments
+venv/
+env/
+.env
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

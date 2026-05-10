@@ -1,0 +1,648 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Results & Outcomes | Single Image 3D Reconstruction{% endblock %}
+
+{% block extra_css %}
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+<style>
+    /* ========== Results Page 3D Styles ========== */
+
+    .recon-showcase-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+        gap: 2rem;
+    }
+
+    .recon-pair-card {
+        background: #fff;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .recon-pair-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+    }
+
+    .recon-pair-header {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #1a202c, #2d3748);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .recon-pair-header .recon-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.9rem;
+    }
+
+    .recon-pair-header h5 {
+        color: #fff;
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .recon-pair-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 320px;
+    }
+
+    .recon-input-side {
+        position: relative;
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        overflow: hidden;
+    }
+
+    .recon-input-side img {
+        max-width: 100%;
+        max-height: 280px;
+        object-fit: contain;
+        border-radius: 0.5rem;
+        transition: transform 0.4s ease;
+    }
+
+    .recon-input-side:hover img {
+        transform: scale(1.05);
+    }
+
+    .recon-side-label {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 2;
+    }
+
+    .recon-side-label.input-label {
+        background: rgba(102, 126, 234, 0.15);
+        color: #667eea;
+    }
+
+    .recon-side-label.output-label {
+        background: rgba(118, 75, 162, 0.15);
+        color: #764ba2;
+    }
+
+    .recon-output-side {
+        position: relative;
+        background: #1a202c;
+    }
+
+    .recon-output-side model-viewer {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        --poster-color: transparent;
+    }
+
+    .recon-arrow-divider {
+        display: none;
+        /* hidden, rely on side-by-side */
+    }
+
+    .recon-pair-footer {
+        padding: 0.75rem 1.5rem;
+        background: #f7fafc;
+        border-top: 1px solid #edf2f7;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .recon-pair-footer .recon-meta {
+        font-size: 0.75rem;
+        color: #718096;
+    }
+
+    .recon-pair-footer .recon-meta i {
+        color: #667eea;
+        margin-right: 3px;
+    }
+
+    .recon-pair-footer .recon-link {
+        padding: 4px 14px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .recon-pair-footer .recon-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .recon-showcase-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .recon-pair-body {
+            grid-template-columns: 1fr;
+        }
+
+        .recon-output-side model-viewer {
+            min-height: 250px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">Results & Outcomes</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Results</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Metrics Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Performance</span>
+            <h2 class="section-title">Key Performance Metrics</h2>
+            <p class="section-subtitle">
+                Quantitative evaluation on ShapeNet and Google Scanned Object (GSO) datasets
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <div class="metric-value">70%</div>
+                    <div class="metric-label">Rendering Time Reduction</div>
+                    <div class="metric-description">3D Gaussian Splatting vs NeRF-based optimization</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                    <div class="metric-value">25s</div>
+                    <div class="metric-label">Average Generation Time</div>
+                    <div class="metric-description">Feedforward 3D editing pipeline</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="metric-value">108×</div>
+                    <div class="metric-label">Speed Improvement</div>
+                    <div class="metric-description">vs SPARC3D (25s vs 45min)</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-sync"></i></div>
+                    <div class="metric-value">20%</div>
+                    <div class="metric-label">Fewer Iterations</div>
+                    <div class="metric-description">KNN importance sampling convergence</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== 3D RECONSTRUCTION RESULTS ==================== -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Reconstructions</span>
+            <h2 class="section-title">Input → 3D Reconstruction</h2>
+            <p class="section-subtitle">
+                Side-by-side comparison of input photographs and their AI-generated 3D textured meshes
+            </p>
+        </div>
+
+        {% if artifacts %}
+        <div class="recon-showcase-grid">
+            {% for art in artifacts %}
+            <div class="recon-pair-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1 }}00">
+                <div class="recon-pair-header">
+                    <div class="recon-icon"><i class="fas fa-cube"></i></div>
+                    <h5>{{ art.name }}</h5>
+                </div>
+                <div class="recon-pair-body">
+                    <!-- Input Side -->
+                    <div class="recon-input-side">
+                        <span class="recon-side-label input-label">
+                            <i class="fas fa-image me-1"></i>Input
+                        </span>
+                        {% if art.input_image %}
+                        <img src="{% static art.input_image %}" alt="{{ art.name }} input">
+                        {% endif %}
+                    </div>
+                    <!-- 3D Output Side -->
+                    <div class="recon-output-side">
+                        <span class="recon-side-label output-label">
+                            <i class="fas fa-cube me-1"></i>3D Output
+                        </span>
+                        {% if art.best_glb %}
+                        <model-viewer src="{% static art.best_glb %}" alt="{{ art.name }} 3D reconstruction" auto-rotate
+                            camera-controls shadow-intensity="0.8" environment-image="neutral"
+                            loading="lazy"></model-viewer>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="recon-pair-footer">
+                    <span class="recon-meta">
+                        <i class="fas fa-layer-group"></i> {{ art.iteration_count }} iterations &nbsp;
+                        <i class="fas fa-file-code"></i> GLB mesh
+                    </span>
+                    <a href="{% url 'project_showcase:screenshots' %}" class="recon-link">
+                        <i class="fas fa-th me-1"></i> View All
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted">No reconstruction data available yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Comparison Table -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Comparison</span>
+            <h2 class="section-title">Quantitative Comparison</h2>
+            <p class="section-subtitle">
+                Our Qwen2509+Hunyuan3D pipeline vs SPARC3D
+            </p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10" data-aos="fade-up">
+                <div class="comparison-table-wrapper">
+                    <table class="table comparison-results-table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Qwen2509+Hunyuan3D</th>
+                                <th>SPARC3D</th>
+                                <th>Winner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Generation Time (avg)</strong></td>
+                                <td class="highlight">25 seconds</td>
+                                <td>45 minutes</td>
+                                <td><span class="badge bg-success">Ours</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Multi-View Consistency</strong></td>
+                                <td class="highlight">Perfect (direct 3D)</td>
+                                <td>Very High</td>
+                                <td><span class="badge bg-success">Ours</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Detail Quality</strong></td>
+                                <td>High</td>
+                                <td class="highlight">Very High</td>
+                                <td><span class="badge bg-primary">SPARC3D</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Material Realism</strong></td>
+                                <td>Good</td>
+                                <td class="highlight">Excellent</td>
+                                <td><span class="badge bg-primary">SPARC3D</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Prompt Adherence</strong></td>
+                                <td class="highlight">Excellent</td>
+                                <td class="highlight">Excellent</td>
+                                <td><span class="badge bg-secondary">Tie</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scalability</strong></td>
+                                <td class="highlight">High (containerized)</td>
+                                <td>Moderate</td>
+                                <td><span class="badge bg-success">Ours</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reconstruction Results -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Reconstruction</span>
+            <h2 class="section-title">Reconstruction Pipeline Results</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="result-card-detailed">
+                    <div class="result-header">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <h4>Geometric Accuracy</h4>
+                    </div>
+                    <div class="result-body">
+                        <p>Camera-conditioned SDS effectively mitigated the Janus problem, resulting in geometrically
+                            consistent reconstructions.</p>
+                        <ul class="result-points">
+                            <li>Multi-view consistent geometry</li>
+                            <li>Reduced artifacts significantly</li>
+                            <li>Accurate depth estimation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="result-card-detailed">
+                    <div class="result-header">
+                        <i class="fas fa-rocket text-primary"></i>
+                        <h4>Computational Efficiency</h4>
+                    </div>
+                    <div class="result-body">
+                        <p>Replacing volumetric ray marching with Gaussian rasterization reduced training time by 60%.
+                        </p>
+                        <ul class="result-points">
+                            <li>60% faster training</li>
+                            <li>Real-time rendering at 1080p</li>
+                            <li>Lower memory footprint</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="result-card-detailed">
+                    <div class="result-header">
+                        <i class="fas fa-bullseye text-warning"></i>
+                        <h4>Initialization Impact</h4>
+                    </div>
+                    <div class="result-body">
+                        <p>Importance-sampled initialization accelerated optimization and prevented degeneracy during
+                            early training.</p>
+                        <ul class="result-points">
+                            <li>20% fewer iterations needed</li>
+                            <li>More stable convergence</li>
+                            <li>Better final quality</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feedforward Results -->
+<section class="section-padding bg-dark text-white">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Editing</span>
+            <h2 class="section-title text-white">Feedforward Pipeline Results</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="ff-result-card">
+                    <h4><i class="fas fa-magic me-2"></i>Direct Asset Manipulation</h4>
+                    <p>The pipeline directly edits complete 3D representations, eliminating reconstruction artifacts and
+                        ensuring perfect geometric consistency.</p>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="ff-result-card">
+                    <h4><i class="fas fa-bolt me-2"></i>Inference-Only Speed</h4>
+                    <p>Pure inference on pre-trained models enables generation in 20-30 seconds with no training
+                        required, making it 240× faster than iterative methods.</p>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="ff-result-card">
+                    <h4><i class="fas fa-chart-line me-2"></i>Predictable Performance</h4>
+                    <p>Inference-only operation ensures consistent generation times and quality across all inputs.</p>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="ff-result-card">
+                    <h4><i class="fas fa-comments me-2"></i>Instruction Processing</h4>
+                    <p>Qwen2509's ability to parse complex instructions significantly improved usability and enabled
+                        precise control over editing operations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Milestones -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Progress</span>
+            <h2 class="section-title">Milestones Achieved</h2>
+        </div>
+
+        <div class="milestones-grid" data-aos="fade-up">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>3D Gaussian Splatting</h5>
+                        <p>Implemented and trained vanilla 3DGS on multi-view datasets</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>Triangle Splatting</h5>
+                        <p>Investigated alternative representation framework</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>DreamFusion Baseline</h5>
+                        <p>Implemented SDS fundamentals and NeRF-based architecture</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>DreamGaussian</h5>
+                        <p>Adapted SDS to 3DGS with mesh export capabilities</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>Monocular Depth</h5>
+                        <p>Integrated depth estimation for initialization</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>Importance Sampling</h5>
+                        <p>Developed KNN and curvature-based sampling</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>Camera-Conditioned Pipeline</h5>
+                        <p>Unified pipeline with multiview diffusion</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>Feedforward Editing</h5>
+                        <p>Integrated Qwen2509 + Hunyuan3D pipeline</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="milestone-card completed">
+                        <div class="milestone-icon"><i class="fas fa-check"></i></div>
+                        <h5>Comparative Evaluation</h5>
+                        <p>Benchmarked against SPARC3D</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Limitations -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Limitations</span>
+            <h2 class="section-title">Known Limitations</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="limitation-card">
+                    <h5><i class="fas fa-exclamation-triangle text-warning me-2"></i>Reconstruction Pipeline</h5>
+                    <ul>
+                        <li>Per-scene optimization required (45+ min)</li>
+                        <li>Foreground bias in initialization</li>
+                        <li>Ambiguity in occluded areas</li>
+                        <li>Quality depends on iteration count</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="limitation-card">
+                    <h5><i class="fas fa-exclamation-triangle text-warning me-2"></i>Feedforward Pipeline</h5>
+                    <ul>
+                        <li>Detail loss from single-pass inference</li>
+                        <li>Fixed model capabilities (no fine-tuning)</li>
+                        <li>High memory requirements (>30GB)</li>
+                        <li>Limited topological changes</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="limitation-card">
+                    <h5><i class="fas fa-exclamation-triangle text-warning me-2"></i>System-Level</h5>
+                    <ul>
+                        <li>Dataset bias from training data</li>
+                        <li>Requires A100 GPU (40GB+ VRAM)</li>
+                        <li>Evaluation metrics are incomplete</li>
+                        <li>Limited to single objects currently</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Discussion -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Discussion</span>
+            <h2 class="section-title">Key Findings</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                <div class="discussion-content">
+                    <h4>Integrated System Advantages</h4>
+                    <p>The combination of both optimization-based and feedforward pipelines creates a comprehensive
+                        framework with several key advantages:</p>
+
+                    <div class="advantage-item">
+                        <div class="advantage-number">1</div>
+                        <div class="advantage-content">
+                            <h5>Workflow Flexibility</h5>
+                            <p>Users can choose between rapid feedforward generation for initial prototypes and
+                                optimization-based refinement for final assets.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-item">
+                        <div class="advantage-number">2</div>
+                        <div class="advantage-content">
+                            <h5>Iterative Enhancement</h5>
+                            <p>Feedforward outputs can serve as initialization for optimization-based refinement,
+                                combining speed advantages with quality improvements.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-item">
+                        <div class="advantage-number">3</div>
+                        <div class="advantage-content">
+                            <h5>Application-Specific Selection</h5>
+                            <p>Interactive applications benefit from feedforward speed, while archival reconstruction
+                                benefits from optimization quality.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

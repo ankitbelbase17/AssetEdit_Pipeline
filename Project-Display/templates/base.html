@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Single Image 3D Reconstruction - A Final Year Project by Tribhuvan University, IOE Pulchowk Campus. Generating detailed 3D models from single 2D images using AI and deep learning.">
+    <meta name="keywords" content="3D Reconstruction, Single Image, AI, Deep Learning, Computer Vision, Gaussian Splatting, Diffusion Models, Final Year Project">
+    <meta name="author" content="Anish Bishwakarma, Ankit Belbase, Dipan Bartaula">
+    
+    <title>{% block title %}{{ project_title|default:"Single Image 3D Reconstruction" }}{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNavbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'project_showcase:home' %}">
+                <i class="fas fa-cube me-2"></i>
+                <span class="brand-text">SI3DR</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'project_showcase:home' %}">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'project_showcase:about' %}">
+                            <i class="fas fa-info-circle me-1"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'technology' %}active{% endif %}" href="{% url 'project_showcase:technology' %}">
+                            <i class="fas fa-code me-1"></i> Technology
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'architecture' %}active{% endif %}" href="{% url 'project_showcase:architecture' %}">
+                            <i class="fas fa-project-diagram me-1"></i> Architecture
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'features' %}active{% endif %}" href="{% url 'project_showcase:features' %}">
+                            <i class="fas fa-star me-1"></i> Features
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'screenshots' %}active{% endif %}" href="{% url 'project_showcase:screenshots' %}">
+                            <i class="fas fa-images me-1"></i> Gallery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'results' %}active{% endif %}" href="{% url 'project_showcase:results' %}">
+                            <i class="fas fa-chart-bar me-1"></i> Results
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'future_scope' %}active{% endif %}" href="{% url 'project_showcase:future_scope' %}">
+                            <i class="fas fa-rocket me-1"></i> Future
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-light btn-sm px-3 ms-2 {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'project_showcase:contact' %}">
+                            <i class="fas fa-envelope me-1"></i> Contact
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Page Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="footer-title">
+                        <i class="fas fa-cube me-2"></i>Single Image 3D Reconstruction
+                    </h5>
+                    <p class="text-muted">
+                        A final year project demonstrating advanced 3D reconstruction and editing 
+                        capabilities using diffusion models, Gaussian splatting, and feedforward generation.
+                    </p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="text-muted me-3"><i class="fab fa-github fa-lg"></i></a>
+                        <a href="#" class="text-muted me-3"><i class="fab fa-linkedin fa-lg"></i></a>
+                        <a href="#" class="text-muted"><i class="fas fa-globe fa-lg"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="footer-subtitle">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li><a href="{% url 'project_showcase:about' %}">About Project</a></li>
+                        <li><a href="{% url 'project_showcase:technology' %}">Technology</a></li>
+                        <li><a href="{% url 'project_showcase:architecture' %}">Architecture</a></li>
+                        <li><a href="{% url 'project_showcase:features' %}">Features</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="footer-subtitle">More Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{% url 'project_showcase:screenshots' %}">Gallery</a></li>
+                        <li><a href="{% url 'project_showcase:results' %}">Results</a></li>
+                        <li><a href="{% url 'project_showcase:future_scope' %}">Future Scope</a></li>
+                        <li><a href="{% url 'project_showcase:contact' %}">Contact</a></li>
+                        <li><a href="{% url 'project_showcase:team' %}">Team</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="footer-subtitle">Institution</h6>
+                    <address class="text-muted">
+                        <strong>{{ institution|default:"Tribhuvan University" }}</strong><br>
+                        Institute of Engineering, Pulchowk Campus<br>
+                        Department of Electronics and Computer Engineering<br>
+                        Lalitpur, Nepal
+                    </address>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-envelope me-2"></i>info@ioe.edu.np
+                    </p>
+                </div>
+            </div>
+            
+            <hr class="my-4 border-secondary">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-muted">
+                        &copy; 2025 Single Image 3D Reconstruction. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0 text-muted">
+                        Final Year Project - December 2025
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to Top Button -->
+    <button type="button" class="btn btn-primary btn-floating btn-lg" id="btn-back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

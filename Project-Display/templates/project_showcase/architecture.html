@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Architecture | Single Image 3D Reconstruction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">System Architecture</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Architecture</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Architecture Overview -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Overview</span>
+            <h2 class="section-title">Integrated System Design</h2>
+            <p class="section-subtitle">
+                A comprehensive framework combining optimization-based reconstruction with feedforward editing
+            </p>
+        </div>
+        
+        <!-- Architecture Diagram -->
+        <div class="architecture-diagram" data-aos="fade-up">
+            <div class="arch-container">
+                <!-- Input -->
+                <div class="arch-input">
+                    <div class="arch-box input-box">
+                        <i class="fas fa-image"></i>
+                        <span>Single RGB Image</span>
+                    </div>
+                </div>
+                
+                <!-- Main Pipeline -->
+                <div class="arch-pipeline">
+                    <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <!-- Stage I -->
+                    <div class="arch-stage stage-1">
+                        <div class="stage-header">Stage I</div>
+                        <div class="stage-content">
+                            <h5>Geometric Inference</h5>
+                            <ul>
+                                <li>Depth Estimation</li>
+                                <li>Normal Prediction</li>
+                                <li>Point Cloud Generation</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <!-- Stage II -->
+                    <div class="arch-stage stage-2">
+                        <div class="stage-header">Stage II</div>
+                        <div class="stage-content">
+                            <h5>Diffusion Optimization</h5>
+                            <ul>
+                                <li>3D Gaussian Init</li>
+                                <li>Camera-Cond. SDS</li>
+                                <li>Mesh Extraction</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <!-- Stage III -->
+                    <div class="arch-stage stage-3">
+                        <div class="stage-header">Stage III</div>
+                        <div class="stage-content">
+                            <h5>Feedforward Editing</h5>
+                            <ul>
+                                <li>Qwen2509 Parsing</li>
+                                <li>Hunyuan3D Gen</li>
+                                <li>Direct Asset Edit</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Output -->
+                <div class="arch-output">
+                    <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+                    <div class="arch-box output-box">
+                        <i class="fas fa-cube"></i>
+                        <span>3D Model / Mesh</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Detailed Pipeline Stages -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Pipeline</span>
+            <h2 class="section-title">Pipeline Stages in Detail</h2>
+        </div>
+        
+        <!-- Stage I: Geometric Inference -->
+        <div class="pipeline-detail mb-5" data-aos="fade-up">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="stage-badge">Stage I</div>
+                    <h3>Geometric Inference & Point Cloud Generation</h3>
+                    <p>
+                        The first stage extracts geometric priors from the single input RGB image. 
+                        This provides the foundation for accurate 3D reconstruction by establishing 
+                        initial depth and surface information.
+                    </p>
+                    
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>Monocular Depth Estimation</h5>
+                                <p>Deep learning models predict dense depth maps from the single input image, providing relative depth information for each pixel.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>Surface Normal Prediction</h5>
+                                <p>Estimate surface normals to understand local geometry and surface orientation, crucial for accurate reconstruction.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>Importance Sampling</h5>
+                                <p>Generate point clouds using stratified importance sampling, concentrating points in geometrically significant regions.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h5>KNN Refinement</h5>
+                                <p>Refine point clouds using K-Nearest Neighbors for outlier removal and density optimization.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="stage-visual stage-1-visual">
+                        <div class="visual-flow">
+                            <div class="flow-item">
+                                <i class="fas fa-image"></i>
+                                <span>Input Image</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <i class="fas fa-layer-group"></i>
+                                <span>Depth Map</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <i class="fas fa-cloud"></i>
+                                <span>Point Cloud</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stage II: Diffusion-Guided Optimization -->
+        <div class="pipeline-detail mb-5" data-aos="fade-up">
+            <div class="row align-items-center flex-lg-row-reverse">
+                <div class="col-lg-6">
+                    <div class="stage-badge">Stage II</div>
+                    <h3>Diffusion-Guided Optimization & Rendering</h3>
+                    <p>
+                        The second stage converts the point cloud into a Gaussian representation 
+                        and optimizes it using camera-conditioned score distillation sampling 
+                        for multi-view consistent reconstruction.
+                    </p>
+                    
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>Gaussian Initialization</h5>
+                                <p>Convert point cloud to 3D Gaussian representation with position, covariance, opacity, and spherical harmonics.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>Camera-Conditioned SDS</h5>
+                                <p>Apply score distillation sampling with camera pose conditioning to enforce geometric consistency across viewpoints.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>Iterative Optimization</h5>
+                                <p>Refine Gaussian parameters through gradient-based optimization guided by diffusion model feedback.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h5>Mesh Extraction</h5>
+                                <p>Extract final mesh with baked textures using marching cubes or density thresholding.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="stage-visual stage-2-visual">
+                        <div class="visual-flow">
+                            <div class="flow-item">
+                                <i class="fas fa-cloud"></i>
+                                <span>Point Cloud</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <i class="fas fa-cubes"></i>
+                                <span>3D Gaussians</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <i class="fas fa-cube"></i>
+                                <span>Textured Mesh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stage III: Feedforward Editing -->
+        <div class="pipeline-detail" data-aos="fade-up">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="stage-badge">Stage III</div>
+                    <h3>Feedforward 3D Editing & Generation</h3>
+                    <p>
+                        The third stage provides a complementary feedforward pipeline for rapid 
+                        3D asset generation and direct editing using natural language instructions.
+                    </p>
+                    
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>Instruction Parsing (Qwen2509)</h5>
+                                <p>Multimodal vision-language model parses user instructions and generates structured editing prompts.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>Direct 3D Generation (Hunyuan3D)</h5>
+                                <p>Feedforward generator directly produces complete 3D assets from text or image inputs in a single pass.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>Asset Manipulation</h5>
+                                <p>Apply text-guided edits directly to 3D representations without multi-view intermediate steps.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h5>Output Generation</h5>
+                                <p>Export final edited 3D asset in standard formats (OBJ, GLB) with materials and textures.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="stage-visual stage-3-visual">
+                        <div class="visual-flow">
+                            <div class="flow-item">
+                                <i class="fas fa-comment-dots"></i>
+                                <span>Text/Image Input</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <i class="fas fa-robot"></i>
+                                <span>Feedforward Gen</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-item">
+                                <i class="fas fa-cube"></i>
+                                <span>Edited 3D Asset</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Methodology Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Methodology</span>
+            <h2 class="section-title">Development Phases</h2>
+            <p class="section-subtitle">
+                The project was developed through multiple iterative phases
+            </p>
+        </div>
+        
+        <div class="timeline">
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="timeline-marker">1</div>
+                <div class="timeline-content">
+                    <h4>Classical 3D Gaussian Splatting</h4>
+                    <p>Implementation and training of vanilla 3DGS on multi-view datasets to understand the representation.</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="timeline-marker">2</div>
+                <div class="timeline-content">
+                    <h4>Triangle Splatting Investigation</h4>
+                    <p>Exploration of alternative triangle-based representations for comparison with Gaussian approaches.</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="timeline-marker">3</div>
+                <div class="timeline-content">
+                    <h4>DreamFusion Baseline</h4>
+                    <p>Implementation of Score Distillation Sampling (SDS) fundamentals using NeRF-based architecture.</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="timeline-marker">4</div>
+                <div class="timeline-content">
+                    <h4>DreamGaussian Implementation</h4>
+                    <p>Adapting SDS to 3D Gaussian Splatting for faster optimization and mesh conversion capabilities.</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="500">
+                <div class="timeline-marker">5</div>
+                <div class="timeline-content">
+                    <h4>Monocular Depth Integration</h4>
+                    <p>Single image 3D reconstruction via monocular depth estimation and surface normal prediction.</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="600">
+                <div class="timeline-marker">6</div>
+                <div class="timeline-content">
+                    <h4>Importance Sampling & Point Cloud</h4>
+                    <p>Development of importance sampling framework and KNN-based point cloud refinement.</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="700">
+                <div class="timeline-marker">7</div>
+                <div class="timeline-content">
+                    <h4>Integrated Camera-Conditioned Pipeline</h4>
+                    <p>Unified pipeline with multiview diffusion adaptation and depth-based initialization.</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="800">
+                <div class="timeline-marker">8</div>
+                <div class="timeline-content">
+                    <h4>Feedforward Editing Pipeline</h4>
+                    <p>Integration of Qwen2509 + Hunyuan3D for direct text-guided 3D asset generation and editing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- System Flow Diagram -->
+<section class="section-padding bg-dark text-white">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Flow</span>
+            <h2 class="section-title text-white">System Workflow</h2>
+        </div>
+        
+        <div class="workflow-diagram" data-aos="fade-up">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="workflow-container">
+                        <!-- Row 1: Input Processing -->
+                        <div class="workflow-row">
+                            <div class="workflow-node input">
+                                <i class="fas fa-upload"></i>
+                                <span>Image Upload</span>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-node process">
+                                <i class="fas fa-cogs"></i>
+                                <span>Preprocessing</span>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-node process">
+                                <i class="fas fa-layer-group"></i>
+                                <span>Depth Estimation</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 2: Core Processing -->
+                        <div class="workflow-row">
+                            <div class="workflow-node process">
+                                <i class="fas fa-cloud"></i>
+                                <span>Point Cloud</span>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-node highlight">
+                                <i class="fas fa-cubes"></i>
+                                <span>3D Gaussians</span>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-node process">
+                                <i class="fas fa-sync"></i>
+                                <span>SDS Optimization</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 3: Output -->
+                        <div class="workflow-row">
+                            <div class="workflow-node process">
+                                <i class="fas fa-edit"></i>
+                                <span>Editing (Optional)</span>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-node process">
+                                <i class="fas fa-cube"></i>
+                                <span>Mesh Export</span>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-node output">
+                                <i class="fas fa-download"></i>
+                                <span>Final Output</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

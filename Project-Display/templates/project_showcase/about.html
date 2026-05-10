@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Project | Single Image 3D Reconstruction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">About the Project</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">About</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Abstract Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                <div class="content-card">
+                    <div class="section-badge mb-3">Abstract</div>
+                    <h2 class="mb-4">Project Overview</h2>
+                    {% if project_info and project_info.abstract %}
+                        <p class="lead">{{ project_info.abstract }}</p>
+                    {% else %}
+                        <p class="lead">
+                            This project, <strong>Single Image 3D Reconstruction</strong>, focuses on generating detailed 
+                            three-dimensional models from a single two-dimensional image using recent advances in 
+                            generative modeling and feedforward 3D editing.
+                        </p>
+                        <p>
+                            Traditional 3D reconstruction relies on multiple calibrated images or depth sensors, 
+                            which limits scalability and accessibility. Our approach integrates diffusion-based priors, 
+                            camera-conditioned score distillation, 3D Gaussian Splatting (3DGS), and feedforward 3D 
+                            editing capabilities to address these challenges.
+                        </p>
+                        <p>
+                            The pipeline begins with monocular depth estimation and importance-sampled point cloud 
+                            initialization, followed by iterative optimization guided by a camera-aware diffusion process. 
+                            Additionally, we introduce a feedforward 3D editing pipeline combining Qwen2509 with 
+                            Hunyuan3D-1.0 for direct text-guided and image-guided 3D asset generation and editing.
+                        </p>
+                        <p>
+                            Unlike traditional approaches that generate multi-view images and reconstruct geometry, 
+                            our feedforward pipeline directly edits complete 3D assets in a single pass. This integrated 
+                            framework balances geometric fidelity, computational efficiency, real-time rendering 
+                            capabilities, and flexible post-reconstruction editing.
+                        </p>
+                        <p>
+                            By achieving high-quality reconstructions and edits within minutes, the system demonstrates 
+                            a viable pathway toward fast and practical single-image 3D reconstruction and manipulation, 
+                            with potential applications in <strong>AR/VR content generation</strong>, <strong>digital heritage</strong>, 
+                            <strong>e-commerce visualization</strong>, and <strong>interactive 3D content creation</strong>.
+                        </p>
+                    {% endif %}
+                    
+                    <div class="keywords-section mt-4">
+                        <h6 class="text-muted mb-3">Keywords:</h6>
+                        <div class="keywords-list">
+                            <span class="keyword-tag">3D Reconstruction</span>
+                            <span class="keyword-tag">Diffusion Models</span>
+                            <span class="keyword-tag">Gaussian Splatting</span>
+                            <span class="keyword-tag">Single-View Geometry</span>
+                            <span class="keyword-tag">Point Cloud Generation</span>
+                            <span class="keyword-tag">NeRFs</span>
+                            <span class="keyword-tag">3D Editing</span>
+                            <span class="keyword-tag">Feedforward Generation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem Statement Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Challenge</span>
+            <h2 class="section-title">Problem Statement</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="problem-card">
+                    <div class="problem-number">1</div>
+                    <h4>View Inconsistency & Janus Problem</h4>
+                    <p>
+                        Diffusion models trained on 2D datasets often exhibit viewpoint bias toward 
+                        canonical orientations, leading to inconsistent multi-view reconstructions. 
+                        This results in artifacts such as the "Janus effect," where objects appear 
+                        with duplicated or distorted front-facing geometry.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="problem-card">
+                    <div class="problem-number">2</div>
+                    <h4>Computational Inefficiency</h4>
+                    <p>
+                        Neural Radiance Fields (NeRFs) achieve high-quality photorealistic renderings 
+                        but require hours of optimization and expensive volumetric ray marching, 
+                        limiting their practical use in real-time or iterative applications.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="problem-card">
+                    <div class="problem-number">3</div>
+                    <h4>Detail vs. Consistency Trade-off</h4>
+                    <p>
+                        Methods emphasizing fine visual detail via 2D priors often sacrifice geometric 
+                        accuracy, while strongly regularized 3D methods yield smooth but less detailed 
+                        outputs. Achieving both fine-grained detail and spatial consistency remains a key challenge.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="problem-card">
+                    <div class="problem-number">4</div>
+                    <h4>Lack of Efficient Initialization</h4>
+                    <p>
+                        Many single-image pipelines rely on random or uniform sampling to initialize 
+                        3D representations, resulting in slow convergence and unstable optimization. 
+                        Incorporating monocular depth priors can provide more accurate initialization.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="problem-card">
+                    <div class="problem-number">5</div>
+                    <h4>Limited Post-Reconstruction Editing</h4>
+                    <p>
+                        Most 3D reconstruction pipelines produce static outputs that cannot be easily 
+                        modified or edited according to user preferences. The lack of intuitive editing 
+                        interfaces limits the practical utility of reconstructed 3D assets.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="problem-card">
+                    <div class="problem-number">6</div>
+                    <h4>Slow Iterative Optimization</h4>
+                    <p>
+                        Traditional 3D editing approaches require per-scene optimization, making 
+                        real-time interactive editing impractical. Feedforward models that can 
+                        instantly generate or modify 3D content are needed.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Objectives Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Goals</span>
+            <h2 class="section-title">Project Objectives</h2>
+            <p class="section-subtitle">
+                The primary objectives of this Single-Image 3D Reconstruction and Editing (SI3DR) project
+            </p>
+        </div>
+        
+        <div class="row g-4">
+            {% if objectives %}
+                {% for objective in objectives %}
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+                    <div class="objective-card">
+                        <div class="objective-icon">
+                            <i class="{{ objective.icon|default:'fas fa-bullseye' }}"></i>
+                        </div>
+                        <div class="objective-content">
+                            <h5>{{ objective.title }}</h5>
+                            <p>{{ objective.description }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Default objectives -->
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="objective-card">
+                        <div class="objective-icon"><i class="fas fa-project-diagram"></i></div>
+                        <div class="objective-content">
+                            <h5>Unified Reconstruction Pipeline</h5>
+                            <p>Implement a unified single-image 3D reconstruction pipeline that integrates monocular depth estimation, importance-sampled point cloud generation, and camera-conditioned score distillation sampling (CC-SDS).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="objective-card">
+                        <div class="objective-icon"><i class="fas fa-cube"></i></div>
+                        <div class="objective-content">
+                            <h5>High-Fidelity Reconstructions</h5>
+                            <p>Achieve geometrically consistent, high-fidelity reconstructions by leveraging pre-trained 2D diffusion models for viewpoint-aware optimization and detailed surface refinement.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="objective-card">
+                        <div class="objective-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        <div class="objective-content">
+                            <h5>Computational Efficiency</h5>
+                            <p>Optimize for computational efficiency using 3D Gaussian Splatting (3DGS), enabling near real-time rendering and faster convergence compared to NeRF-based systems.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="objective-card">
+                        <div class="objective-icon"><i class="fas fa-magic"></i></div>
+                        <div class="objective-content">
+                            <h5>Feedforward 3D Editing</h5>
+                            <p>Develop a feedforward 3D editing pipeline integrating Qwen2509 with Hunyuan3D-1.0 for text-guided and image-guided direct 3D asset generation and editing.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="500">
+                    <div class="objective-card">
+                        <div class="objective-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div class="objective-content">
+                            <h5>Comprehensive Evaluation</h5>
+                            <p>Evaluate the pipelines on synthetic and real-world datasets using metrics such as Chamfer Distance (CD), F1-Score, SSIM, and qualitative user studies.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="600">
+                    <div class="objective-card">
+                        <div class="objective-icon"><i class="fas fa-balance-scale"></i></div>
+                        <div class="objective-content">
+                            <h5>Comparative Analysis</h5>
+                            <p>Compare the proposed editing framework against state-of-the-art methods such as SPARC3D to validate performance in terms of generation quality and computational efficiency.</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Scope Section -->
+<section class="section-padding bg-dark text-white">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Scope</span>
+            <h2 class="section-title text-white">Project Scope</h2>
+            <p class="section-subtitle text-muted">
+                A modular multi-stage architecture ensuring flexibility and scalability
+            </p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="scope-card">
+                    <div class="scope-stage">Stage I</div>
+                    <h4>Geometric Inference</h4>
+                    <p>
+                        Extracting geometric priors from a single RGB image using monocular depth 
+                        estimation and surface normal prediction. A dense 3D point cloud is generated 
+                        through stratified importance sampling, concentrating sampling density in 
+                        geometrically informative regions.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="scope-card">
+                    <div class="scope-stage">Stage II</div>
+                    <h4>Diffusion-Guided Optimization</h4>
+                    <p>
+                        The initialized point cloud is converted into a Gaussian representation and 
+                        optimized using camera-conditioned score distillation sampling. 3D Gaussian 
+                        Splatting enables real-time rendering and mesh extraction with baked textures.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="scope-card">
+                    <div class="scope-stage">Stage III</div>
+                    <h4>Feedforward Editing</h4>
+                    <p>
+                        A complementary feedforward pipeline for rapid 3D asset generation and direct 
+                        editing. Enables text-to-3D generation, image-to-3D conversion, and text-guided 
+                        editing of existing 3D assets without multi-view intermediate representations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team & Supervisors Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Team</span>
+            <h2 class="section-title">Project Team & Supervisors</h2>
+        </div>
+        
+        <!-- Supervisors -->
+        <div class="mb-5">
+            <h4 class="text-center mb-4" data-aos="fade-up">Project Supervisors</h4>
+            <div class="row g-4 justify-content-center">
+                {% if supervisors %}
+                    {% for supervisor in supervisors %}
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+                        <div class="supervisor-card">
+                            <h5>{{ supervisor.title }} {{ supervisor.name }}</h5>
+                            <p class="mb-1">{{ supervisor.role }}</p>
+                            {% if supervisor.email %}
+                                <small class="text-muted">{{ supervisor.email }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up">
+                        <div class="supervisor-card">
+                            <h5>Assoc. Prof. Dr. Jyoti Tandukar</h5>
+                            <p class="mb-1">Project Supervisor</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                        <div class="supervisor-card">
+                            <h5>Asst. Prof. Bibha Sthapit</h5>
+                            <p class="mb-1">Project Management Team</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="supervisor-card">
+                            <h5>Asst. Prof. Bikal Adhikari</h5>
+                            <p class="mb-1">Project Management Team</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Team Members -->
+        <h4 class="text-center mb-4" data-aos="fade-up">Development Team</h4>
+        <div class="row g-4 justify-content-center">
+            {% if team_members %}
+                {% for member in team_members %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+                    <div class="team-card">
+                        <div class="team-image">
+                            {% if member.photo %}
+                                <img src="{{ member.photo.url }}" alt="{{ member.name }}">
+                            {% else %}
+                                <div class="team-avatar"><i class="fas fa-user"></i></div>
+                            {% endif %}
+                        </div>
+                        <div class="team-info">
+                            <h4>{{ member.name }}</h4>
+                            <p class="team-roll">{{ member.roll_number }}</p>
+                            <p class="team-role">{{ member.role }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up">
+                    <div class="team-card">
+                        <div class="team-image"><div class="team-avatar"><i class="fas fa-user"></i></div></div>
+                        <div class="team-info">
+                            <h4>Anish Bishwakarma</h4>
+                            <p class="team-roll">PUL078BCT011</p>
+                            <p class="team-role">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="team-card">
+                        <div class="team-image"><div class="team-avatar"><i class="fas fa-user"></i></div></div>
+                        <div class="team-info">
+                            <h4>Ankit Belbase</h4>
+                            <p class="team-roll">PUL078BCT013</p>
+                            <p class="team-role">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="team-card">
+                        <div class="team-image"><div class="team-avatar"><i class="fas fa-user"></i></div></div>
+                        <div class="team-info">
+                            <h4>Dipan Bartaula</h4>
+                            <p class="team-roll">PUL078BCT040</p>
+                            <p class="team-role">Developer</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Institution Info -->
+        <div class="text-center mt-5" data-aos="fade-up">
+            <div class="institution-info">
+                <h5>Tribhuvan University</h5>
+                <p class="mb-1">Institute of Engineering, Pulchowk Campus</p>
+                <p class="text-muted">Department of Electronics and Computer Engineering</p>
+                <p class="text-muted">December 2025</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

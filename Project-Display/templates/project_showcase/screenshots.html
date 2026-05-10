@@ -1,0 +1,1483 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Virtual Museum Gallery | Single Image 3D Reconstruction{% endblock %}
+
+{% block extra_css %}
+<!-- Google Model Viewer for GLB rendering -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+<style>
+    /* ========== Museum Gallery Styles ========== */
+
+    /* --- Artifact Exhibition Cards --- */
+    .museum-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 2rem;
+    }
+
+    .artifact-exhibit-card {
+        background: #fff;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        transition: transform 0.4s cubic-bezier(.25, .8, .25, 1), box-shadow 0.4s cubic-bezier(.25, .8, .25, 1);
+        position: relative;
+    }
+
+    .artifact-exhibit-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(102, 126, 234, 0.18);
+    }
+
+    .artifact-exhibit-card .card-image-area {
+        position: relative;
+        height: 300px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    }
+
+    .artifact-exhibit-card .card-image-area img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.6s ease;
+        padding: 16px;
+    }
+
+    .artifact-exhibit-card:hover .card-image-area img {
+        transform: scale(1.05);
+    }
+
+    .card-image-tabs {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+        z-index: 2;
+    }
+
+    .card-image-tabs .img-tab {
+        padding: 4px 14px;
+        border: none;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(10px);
+    }
+
+    .card-image-tabs .img-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+    }
+
+    .card-image-tabs .img-tab:not(.active) {
+        background: rgba(255, 255, 255, 0.85);
+        color: #4a5568;
+    }
+
+    .card-image-tabs .img-tab:hover:not(.active) {
+        background: rgba(255, 255, 255, 1);
+        color: #667eea;
+    }
+
+    .artifact-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 4px 14px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        z-index: 2;
+    }
+
+    .artifact-card-body {
+        padding: 1.5rem;
+    }
+
+    .artifact-card-body h4 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #1a202c;
+    }
+
+    .artifact-card-body .artifact-meta {
+        font-size: 0.8rem;
+        color: #718096;
+        margin-bottom: 1rem;
+    }
+
+    .artifact-card-body .artifact-meta i {
+        color: #667eea;
+        margin-right: 4px;
+    }
+
+    .artifact-card-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .artifact-card-actions .btn-view-3d {
+        flex: 1;
+        padding: 0.6rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .artifact-card-actions .btn-view-3d:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .artifact-card-actions .btn-gallery {
+        padding: 0.6rem 1rem;
+        background: #edf2f7;
+        border: none;
+        border-radius: 10px;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .artifact-card-actions .btn-gallery:hover {
+        background: #e2e8f0;
+        color: #1a202c;
+    }
+
+    /* --- Delete Artifact Button --- */
+    .btn-delete-artifact {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 20;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        opacity: 0.6;
+    }
+
+    .btn-delete-artifact:hover {
+        background: #ef4444;
+        opacity: 1;
+        transform: scale(1.15);
+        box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4);
+    }
+
+    /* --- 3D Viewer Modal --- */
+    .viewer-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+    }
+
+    .viewer-modal-overlay.active {
+        display: flex;
+    }
+
+    .viewer-modal-content {
+        width: 90vw;
+        max-width: 1100px;
+        height: 80vh;
+        background: #1a202c;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .viewer-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .viewer-modal-header h4 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .viewer-modal-header .close-viewer {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .viewer-modal-header .close-viewer:hover {
+        background: rgba(245, 101, 101, 0.8);
+    }
+
+    .viewer-modal-body {
+        height: calc(100% - 120px);
+        position: relative;
+    }
+
+    .viewer-modal-body model-viewer {
+        width: 100%;
+        height: 100%;
+        --poster-color: transparent;
+    }
+
+    .viewer-iteration-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        overflow-x: auto;
+    }
+
+    .viewer-iteration-bar label {
+        color: #a0aec0;
+        font-size: 0.8rem;
+        font-weight: 600;
+        white-space: nowrap;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .iter-btn {
+        padding: 4px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: transparent;
+        color: #a0aec0;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .iter-btn:hover,
+    .iter-btn.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        border-color: transparent;
+    }
+
+    /* --- Comparison / Heatmap Section --- */
+    .heatmap-compare-card {
+        background: linear-gradient(135deg, #0f1419 0%, #1a202c 100%);
+        border-radius: 1.25rem;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        transition: box-shadow 0.4s ease;
+    }
+
+    .heatmap-compare-card:hover {
+        box-shadow: 0 12px 48px rgba(102, 126, 234, 0.2);
+    }
+
+    /* Card header with artifact info */
+    .hm-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem 1.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .hm-card-header:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .hm-card-thumb {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid rgba(102, 126, 234, 0.3);
+        background: #2d3748;
+    }
+
+    .hm-card-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hm-card-info {
+        flex: 1;
+    }
+
+    .hm-card-info h4 {
+        color: #fff;
+        font-size: 1.1rem;
+        margin-bottom: 0.15rem;
+        font-weight: 700;
+    }
+
+    .hm-card-info p {
+        color: #718096;
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+
+    .hm-card-toggle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #667eea;
+        transition: all 0.3s;
+        flex-shrink: 0;
+    }
+
+    .hm-card-header.active .hm-card-toggle {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        transform: rotate(180deg);
+    }
+
+    /* Card body */
+    .hm-card-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hm-card-body.expanded {
+        max-height: 900px;
+    }
+
+    .hm-card-content {
+        padding: 1.5rem;
+    }
+
+    /* Comparison viewer: input image + dual heatmap panels */
+    .hm-comparison-layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .hm-ref-image {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        background: #2d3748;
+    }
+
+    .hm-ref-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .hm-ref-label {
+        text-align: center;
+        padding: 6px;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Dual Panel */
+    .hm-dual-panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .hm-panel {
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hm-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hm-panel-header .panel-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .hm-panel-header .panel-label.label-a {
+        color: #667eea;
+    }
+
+    .hm-panel-header .panel-label.label-b {
+        color: #f093fb;
+    }
+
+    .hm-panel-header select {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .hm-panel-header select:focus {
+        border-color: #667eea;
+    }
+
+    .hm-panel-header select option {
+        background: #1a202c;
+        color: #e2e8f0;
+    }
+
+    .hm-panel-viewport {
+        aspect-ratio: 4/3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hm-panel-viewport img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Placeholder state when no heatmap image loaded */
+    .hm-panel-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: #4a5568;
+        width: 100%;
+        height: 100%;
+        background: rgba(102, 126, 234, 0.04);
+        border: 2px dashed rgba(102, 126, 234, 0.15);
+        border-radius: 0;
+    }
+
+    .hm-panel-placeholder i {
+        font-size: 2rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hm-panel-placeholder span {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Iteration Timeline Strip */
+    .hm-timeline {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hm-timeline-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .hm-timeline-label span {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #667eea;
+    }
+
+    .hm-timeline-label small {
+        font-size: 0.65rem;
+        color: #4a5568;
+    }
+
+    .hm-timeline-strip {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
+    }
+
+    .hm-timeline-strip::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .hm-timeline-strip::-webkit-scrollbar-thumb {
+        background: rgba(102, 126, 234, 0.3);
+        border-radius: 2px;
+    }
+
+    .hm-iter-thumb {
+        flex-shrink: 0;
+        width: 56px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .hm-iter-thumb:hover {
+        border-color: rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .hm-iter-thumb.selected-a {
+        border-color: #667eea;
+        box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .hm-iter-thumb.selected-b {
+        border-color: #f093fb;
+        box-shadow: 0 0 12px rgba(240, 147, 251, 0.3);
+    }
+
+    .hm-iter-thumb-img {
+        aspect-ratio: 1;
+        background: rgba(102, 126, 234, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hm-iter-thumb-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hm-iter-thumb-num {
+        text-align: center;
+        padding: 2px 0;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: #a0aec0;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Progress bar showing quality evolution */
+    .hm-quality-bar {
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .hm-quality-bar label {
+        font-size: 0.7rem;
+        color: #718096;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .hm-quality-track {
+        flex: 1;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .hm-quality-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #f56565 0%, #ecc94b 30%, #48bb78 70%, #667eea 100%);
+        transition: width 0.6s ease;
+    }
+
+    .hm-quality-markers {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2px;
+    }
+
+    .hm-quality-markers span {
+        font-size: 0.55rem;
+        color: #4a5568;
+    }
+
+    @media (max-width: 992px) {
+        .hm-comparison-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .hm-ref-image {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hm-dual-panel {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* --- Gallery Grid --- */
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .gallery-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .gallery-card:hover {
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+        transform: translateY(-4px);
+    }
+
+    .gallery-image {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+        background: #f7fafc;
+    }
+
+    .gallery-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .gallery-card:hover .gallery-image img {
+        transform: scale(1.08);
+    }
+
+    .gallery-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(102, 126, 234, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .gallery-overlay i {
+        color: #fff;
+        font-size: 2rem;
+    }
+
+    .gallery-card:hover .gallery-overlay {
+        opacity: 1;
+    }
+
+    .gallery-info {
+        padding: 1.25rem;
+    }
+
+    .gallery-info h5 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: #1a202c;
+    }
+
+    .gallery-info p {
+        font-size: 0.8rem;
+        color: #718096;
+        margin-bottom: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .museum-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .viewer-modal-content {
+            width: 96vw;
+            height: 70vh;
+            border-radius: 1rem;
+        }
+
+        .gallery-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">Virtual Museum Gallery</h1>
+                <p class="text-white-50 mt-2" style="font-size:1.1rem; max-width:600px; margin:0 auto;">
+                    Explore Nepali cultural artifacts reconstructed in 3D from single photographs
+                </p>
+                <nav aria-label="breadcrumb" class="mt-3">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Gallery</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== MAIN GALLERY ==================== -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Collection</span>
+            <h2 class="section-title">Museum Artifacts</h2>
+            <p class="section-subtitle">
+                Each artifact showcases the original image, background-removed version, and interactive 3D
+                reconstruction
+            </p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="gallery-filter text-center mb-4" data-aos="fade-up">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="reconstruction">Reconstruction</button>
+            <button class="filter-btn" data-filter="comparison">Comparisons</button>
+        </div>
+
+        {% if artifacts %}
+        <!-- Museum Artifact Cards -->
+        <div class="museum-grid" data-aos="fade-up">
+            {% for art in artifacts %}
+            <div class="artifact-exhibit-card gallery-item" data-category="reconstruction"
+                id="artifact-card-{{ forloop.counter }}" style="position:relative;">
+                <!-- Delete Button -->
+                <button class="btn-delete-artifact"
+                    onclick="deleteArtifact('{{ art.slug }}', {{ forloop.counter }}, {% if art.is_user_generated %}true{% else %}false{% endif %}, '{{ art.session_id|default:"" }}')"
+                    title="Delete {{ art.name }}" aria-label="Delete {{ art.name }}">
+                    <i class="fas fa-times"></i>
+                </button>
+                <!-- Image Area with Tab switching -->
+                <div class="card-image-area" id="card-img-area-{{ forloop.counter }}">
+                    {% if art.input_image %}
+                    <img src="{% if art.is_user_generated %}{{ art.input_image }}{% else %}{% static art.input_image %}{% endif %}"
+                        alt="{{ art.name }} - Original Input" class="card-img active-img" data-type="original">
+                    {% endif %}
+                    {% if art.nobg_image %}
+                    <img src="{% static art.nobg_image %}" alt="{{ art.name }} - Background Removed" class="card-img"
+                        data-type="nobg" style="display:none;">
+                    {% endif %}
+
+                    <span class="artifact-badge">
+                        <i class="fas fa-cube me-1"></i> {{ art.iteration_count }} Iterations
+                    </span>
+
+                    <!-- Tabs to toggle Original / No BG -->
+                    <div class="card-image-tabs">
+                        <button class="img-tab active" data-card="{{ forloop.counter }}"
+                            data-show="original">Original</button>
+                        <button class="img-tab" data-card="{{ forloop.counter }}" data-show="nobg">No BG</button>
+                    </div>
+                </div>
+
+                <div class="artifact-card-body">
+                    <h4>{{ art.name }}</h4>
+                    <div class="artifact-meta">
+                        <i class="fas fa-layer-group"></i> {{ art.iteration_count }} iteration meshes &nbsp;
+                        <i class="fas fa-file-code"></i> GLB format
+                    </div>
+                    <div class="artifact-card-actions">
+                        <button class="btn-view-3d" onclick="open3DViewer('{{ art.name }}', {{ forloop.counter0 }})"
+                            aria-label="View 3D model of {{ art.name }}">
+                            <i class="fas fa-cube"></i> View 3D
+                        </button>
+                        <button class="btn-gallery" onclick="open3DViewer('{{ art.name }}', {{ forloop.counter0 }})">
+                            <i class="fas fa-th"></i> All Meshes
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <h4>No artifacts found</h4>
+            <p class="text-muted">Ensure the BG_removed_ouptuts_hunyuan folder is correctly linked.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- ==================== COMPARISON / HEATMAP SECTION ==================== -->
+<section class="section-padding bg-dark text-white" id="comparison-section">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Comparison</span>
+            <h2 class="section-title text-white">Iteration Heatmap Comparisons</h2>
+            <p class="section-subtitle" style="color:#a0aec0;">
+                Compare quality heatmaps side-by-side across 20 reconstruction iterations —
+                see how each artifact evolves step by step
+            </p>
+        </div>
+
+        {% for art in artifacts %}
+        <div class="heatmap-compare-card gallery-item" data-category="comparison" data-aos="fade-up"
+            data-aos-delay="{{ forloop.counter0 }}50">
+            <!-- Clickable Header -->
+            <div class="hm-card-header" onclick="toggleHeatmapCard(this)">
+                <div class="hm-card-thumb">
+                    {% if art.input_image %}
+                    <img src="{% if art.is_user_generated %}{{ art.input_image }}{% else %}{% static art.input_image %}{% endif %}"
+                        alt="{{ art.name }}">
+                    {% endif %}
+                </div>
+                <div class="hm-card-info">
+                    <h4>{{ art.name }}</h4>
+                    <p><i class="fas fa-fire-alt me-1"></i>{{ art.iteration_count }} iteration heatmaps &nbsp; <i
+                            class="fas fa-columns me-1"></i>Side-by-side comparison</p>
+                </div>
+                <div class="hm-card-toggle">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+
+            <!-- Expandable Body -->
+            <div class="hm-card-body" id="hm-body-{{ forloop.counter }}">
+                <div class="hm-card-content">
+                    <div class="hm-comparison-layout">
+                        <!-- Reference Input Image -->
+                        <div class="hm-ref-image">
+                            {% if art.input_image %}
+                            <img src="{% if art.is_user_generated %}{{ art.input_image }}{% else %}{% static art.input_image %}{% endif %}"
+                                alt="{{ art.name }} reference">
+                            {% endif %}
+                            <div class="hm-ref-label"><i class="fas fa-image me-1"></i>Reference Input</div>
+                        </div>
+
+                        {% if art.is_user_generated %}
+                        <!-- User-Generated: Direct 3D Model + Heatmap Side-by-Side -->
+                        <div>
+                            <div class="hm-dual-panel">
+                                <!-- Panel A: 3D Model -->
+                                <div class="hm-panel">
+                                    <div class="hm-panel-header">
+                                        <span class="panel-label label-a"><i class="fas fa-cube me-1"
+                                                style="font-size:0.5rem"></i>3D Model</span>
+                                    </div>
+                                    <div class="hm-panel-viewport">
+                                        {% if art.best_glb %}
+                                        <model-viewer src="{{ art.best_glb }}" alt="3D Model" auto-rotate
+                                            camera-controls shadow-intensity="1" environment-image="neutral"
+                                            style="width: 100%; height: 100%; display: block;"></model-viewer>
+                                        <div
+                                            style="position:absolute; bottom:10px; left:10px; z-index:5; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:6px; color:#fff; font-size:0.7rem; font-weight:700;">
+                                            GENERATED 3D MESH
+                                        </div>
+                                        {% else %}
+                                        <div class="hm-panel-placeholder">
+                                            <i class="fas fa-cube"></i>
+                                            <span>No 3D model available</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Panel B: Heatmap -->
+                                <div class="hm-panel">
+                                    <div class="hm-panel-header">
+                                        <span class="panel-label label-b"><i class="fas fa-fire me-1"
+                                                style="font-size:0.5rem"></i>Uncertainty Map</span>
+                                    </div>
+                                    <div class="hm-panel-viewport">
+                                        {% if art.heatmap_glb %}
+                                        <model-viewer src="{{ art.heatmap_glb }}" alt="Heatmap" auto-rotate
+                                            camera-controls shadow-intensity="1" environment-image="neutral"
+                                            style="width: 100%; height: 100%; display: block;"></model-viewer>
+                                        <div
+                                            style="position:absolute; bottom:10px; left:10px; z-index:5; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:6px; color:#fff; font-size:0.7rem; font-weight:700;">
+                                            TOPOLOGY HEATMAP
+                                        </div>
+                                        {% else %}
+                                        <div class="hm-panel-placeholder">
+                                            <i class="fas fa-fire"></i>
+                                            <span>Heatmap not yet computed</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quality Info -->
+                            <div class="hm-quality-bar" style="margin-top:1rem;">
+                                <label><i class="fas fa-info-circle me-1"></i>Status:</label>
+                                <div style="flex:1;">
+                                    <div class="hm-quality-track">
+                                        <div class="hm-quality-fill"
+                                            style="width: {% if art.heatmap_glb %}100{% else %}50{% endif %}%;"></div>
+                                    </div>
+                                    <div class="hm-quality-markers">
+                                        <span>3D Model ✓</span>
+                                        <span>{% if art.heatmap_glb %}Heatmap ✓{% else %}Heatmap pending{% endif %}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% else %}
+                        <!-- Museum Artifacts: Iteration Dropdown Comparison -->
+                        <div>
+                            <div class="hm-dual-panel">
+                                <!-- Panel A -->
+                                <div class="hm-panel">
+                                    <div class="hm-panel-header">
+                                        <span class="panel-label label-a"><i class="fas fa-circle me-1"
+                                                style="font-size:0.5rem"></i>Panel A</span>
+                                        <select class="hm-select-a" data-artifact="{{ forloop.counter }}"
+                                            onchange="updateHeatmapPanel(this, 'a')">
+                                            <option value="" selected>Select iteration…</option>
+                                            {% for iter in art.iterations %}
+                                            <option value="{{ iter.number }}">Iteration {{ iter.number }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="hm-panel-viewport" id="hm-viewport-a-{{ forloop.counter }}">
+                                        <div class="hm-panel-placeholder">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                            <span>Select iteration above</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Panel B -->
+                                <div class="hm-panel">
+                                    <div class="hm-panel-header">
+                                        <span class="panel-label label-b"><i class="fas fa-circle me-1"
+                                                style="font-size:0.5rem"></i>Panel B</span>
+                                        <select class="hm-select-b" data-artifact="{{ forloop.counter }}"
+                                            onchange="updateHeatmapPanel(this, 'b')">
+                                            <option value="" selected>Select iteration…</option>
+                                            {% for iter in art.iterations %}
+                                            <option value="{{ iter.number }}">Iteration {{ iter.number }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="hm-panel-viewport" id="hm-viewport-b-{{ forloop.counter }}">
+                                        <div class="hm-panel-placeholder">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                            <span>Select iteration above</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Iteration Timeline Strip -->
+                            <div class="hm-timeline">
+                                <div class="hm-timeline-label">
+                                    <span><i class="fas fa-stream me-1"></i>All Iterations</span>
+                                    <small>Click to select for Panel A · Shift+Click for Panel B</small>
+                                </div>
+                                <div class="hm-timeline-strip" id="hm-strip-{{ forloop.counter }}">
+                                    {% for iter in art.iterations %}
+                                    <div class="hm-iter-thumb" data-iter="{{ iter.number }}"
+                                        data-artifact="{{ forloop.parentloop.counter }}"
+                                        onclick="selectIterThumb(event, this)">
+                                        <div class="hm-iter-thumb-img">
+                                            <div
+                                                style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08));">
+                                                <i class="fas fa-fire"
+                                                    style="color:rgba(102,126,234,0.3);font-size:0.9rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="hm-iter-thumb-num">#{{ iter.number }}</div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Quality Evolution Bar -->
+                            <div class="hm-quality-bar">
+                                <label><i class="fas fa-chart-line me-1"></i>Quality:</label>
+                                <div style="flex:1;">
+                                    <div class="hm-quality-track">
+                                        <div class="hm-quality-fill" style="width: 100%;"></div>
+                                    </div>
+                                    <div class="hm-quality-markers">
+                                        <span>Iter 1 (initial)</span>
+                                        <span>Iter 10 (mid)</span>
+                                        <span>Iter {{ art.iteration_count }} (final)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <i class="fas fa-fire-alt fa-3x" style="color:#667eea;opacity:0.3;"></i>
+            <h5 class="text-white mt-3">Heatmap data coming soon</h5>
+            <p style="color:#718096;">Iteration heatmap images will be loaded here for comparison.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ==================== PROCESS VISUALIZATION ==================== -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Process</span>
+            <h2 class="section-title">Reconstruction Pipeline</h2>
+            <p class="section-subtitle">
+                Step-by-step: from a single photograph to interactive 3D mesh
+            </p>
+        </div>
+
+        <div class="process-visualization" data-aos="fade-up">
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="process-step-card">
+                        <div class="step-number">1</div>
+                        <div class="step-image"><i class="fas fa-image"></i></div>
+                        <h6>Input Image</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="process-step-card">
+                        <div class="step-number">2</div>
+                        <div class="step-image"><i class="fas fa-eraser"></i></div>
+                        <h6>BG Removal</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="process-step-card">
+                        <div class="step-number">3</div>
+                        <div class="step-image"><i class="fas fa-eye"></i></div>
+                        <h6>Multi-View</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="process-step-card">
+                        <div class="step-number">4</div>
+                        <div class="step-image"><i class="fas fa-cubes"></i></div>
+                        <h6>3D Generation</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="process-step-card">
+                        <div class="step-number">5</div>
+                        <div class="step-image"><i class="fas fa-paint-brush"></i></div>
+                        <h6>Textured Mesh</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ==================== 3D VIEWER MODAL ==================== -->
+<div class="viewer-modal-overlay" id="viewer3DModal">
+    <div class="viewer-modal-content">
+        <div class="viewer-modal-header">
+            <h4 id="viewerTitle"><i class="fas fa-cube me-2"></i>3D Viewer</h4>
+            <button class="close-viewer" onclick="close3DViewer()" aria-label="Close viewer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="viewer-modal-body">
+            <model-viewer id="glb-viewer" alt="3D Reconstruction" auto-rotate camera-controls shadow-intensity="1"
+                environment-image="neutral" style="width:100%; height:100%;"></model-viewer>
+        </div>
+        <div class="viewer-iteration-bar" id="iterationBar">
+            <label><i class="fas fa-layer-group me-1"></i>Iteration:</label>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== Artifact data from Django =====
+    const artifactData = [
+        {% for art in artifacts %}
+    {
+        name: "{{ art.name }}",
+            slug: "{{ art.slug }}",
+                isUserGenerated: {% if art.is_user_generated %} true{% else %} false{% endif %},
+        bestGlb: "{% if art.is_user_generated %}{{ art.best_glb }}{% elif art.best_glb %}{% static art.best_glb %}{% endif %}",
+            heatmapGlb: "{% if art.heatmap_glb %}{{ art.heatmap_glb }}{% endif %}",
+                iterations: [
+                    {% for iter in art.iterations %}
+    { number: {{ iter.number }}, glb: "{% static iter.glb_path %}", hm_glb: "{% static 'comparison/' %}{{ art.slug }}/iter_{{ iter.number }}.glb" },
+    {% endfor %}
+            ]
+        },
+    {% endfor %}
+    ];
+
+    // ===== Card image tab switching =====
+    document.querySelectorAll('.img-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            const cardIdx = this.dataset.card;
+            const showType = this.dataset.show;
+            const area = document.getElementById('card-img-area-' + cardIdx);
+
+            // Toggle active tab
+            area.querySelectorAll('.img-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Toggle images
+            area.querySelectorAll('.card-img').forEach(img => {
+                img.style.display = img.dataset.type === showType ? 'block' : 'none';
+            });
+        });
+    });
+
+    // ===== 3D Viewer =====
+    function open3DViewer(name, artifactIdx) {
+        const modal = document.getElementById('viewer3DModal');
+        const viewer = document.getElementById('glb-viewer');
+        const titleEl = document.getElementById('viewerTitle');
+        const iterBar = document.getElementById('iterationBar');
+
+        const data = artifactData[artifactIdx];
+        if (!data) return;
+
+        // User-generated artifacts have no iterations but have bestGlb
+        if (data.iterations.length === 0 && !data.bestGlb) return;
+
+        titleEl.innerHTML = '<i class="fas fa-cube me-2"></i>' + name;
+
+        // Build iteration buttons
+        iterBar.innerHTML = '<label><i class="fas fa-layer-group me-1"></i>Iteration:</label>';
+
+        if (data.iterations.length > 0) {
+            data.iterations.forEach((iter, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'iter-btn' + (i === data.iterations.length - 1 ? ' active' : '');
+                btn.textContent = '#' + iter.number;
+                btn.onclick = function () {
+                    iterBar.querySelectorAll('.iter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    viewer.src = iter.glb;
+                };
+                iterBar.appendChild(btn);
+            });
+            // Load the last (best) iteration by default
+            viewer.src = data.iterations[data.iterations.length - 1].glb;
+        } else {
+            // User-generated: single GLB, optionally also show heatmap toggle
+            const bestBtn = document.createElement('button');
+            bestBtn.className = 'iter-btn active';
+            bestBtn.textContent = '3D Model';
+            bestBtn.onclick = function () {
+                iterBar.querySelectorAll('.iter-btn').forEach(b => b.classList.remove('active'));
+                bestBtn.classList.add('active');
+                viewer.src = data.bestGlb;
+            };
+            iterBar.appendChild(bestBtn);
+
+            if (data.heatmapGlb) {
+                const hmBtn = document.createElement('button');
+                hmBtn.className = 'iter-btn';
+                hmBtn.textContent = '🔥 Heatmap';
+                hmBtn.onclick = function () {
+                    iterBar.querySelectorAll('.iter-btn').forEach(b => b.classList.remove('active'));
+                    hmBtn.classList.add('active');
+                    viewer.src = data.heatmapGlb;
+                };
+                iterBar.appendChild(hmBtn);
+            }
+
+            viewer.src = data.bestGlb;
+        }
+
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function close3DViewer() {
+        const modal = document.getElementById('viewer3DModal');
+        const viewer = document.getElementById('glb-viewer');
+        modal.classList.remove('active');
+        viewer.src = '';
+        document.body.style.overflow = '';
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') close3DViewer();
+    });
+
+    // Close on overlay click
+    document.getElementById('viewer3DModal').addEventListener('click', function (e) {
+        if (e.target === this) close3DViewer();
+    });
+
+    // ===== Gallery Filter =====
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const filter = this.dataset.filter;
+
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                if (filter === 'all' || item.dataset.category === filter) {
+                    item.style.display = '';
+                    item.style.animation = 'fadeIn 0.5s ease';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // ===== Heatmap Comparison Section =====
+
+    // Toggle accordion card open/close
+    function toggleHeatmapCard(headerEl) {
+        const card = headerEl.closest('.heatmap-compare-card');
+        const body = card.querySelector('.hm-card-body');
+        const isExpanded = body.classList.contains('expanded');
+
+        // Close all other cards first
+        document.querySelectorAll('.hm-card-body.expanded').forEach(b => {
+            b.classList.remove('expanded');
+            b.closest('.heatmap-compare-card').querySelector('.hm-card-header').classList.remove('active');
+        });
+
+        // Toggle this card
+        if (!isExpanded) {
+            body.classList.add('expanded');
+            headerEl.classList.add('active');
+        }
+    }
+
+    // Update heatmap panel when dropdown selection changes
+    // (Currently shows placeholder since actual heatmap images will be added later)
+    function updateHeatmapPanel(selectEl, panel) {
+        const artifactNum = selectEl.dataset.artifact;
+        const iterNum = selectEl.value;
+        const viewport = document.getElementById('hm-viewport-' + panel + '-' + artifactNum);
+        const strip = document.getElementById('hm-strip-' + artifactNum);
+
+        if (!iterNum) {
+            // Reset to placeholder
+            viewport.innerHTML = '<div class="hm-panel-placeholder"><i class="fas fa-map-marked-alt"></i><span>Select iteration above</span></div>';
+            // Clear timeline highlight
+            if (strip) {
+                strip.querySelectorAll('.hm-iter-thumb').forEach(t => t.classList.remove('selected-' + panel));
+            }
+            return;
+        }
+
+        const artData = artifactData[artifactNum - 1];
+        const iterData = artData.iterations.find(iter => iter.number == iterNum);
+
+        if (iterData && iterData.hm_glb) {
+            viewport.innerHTML = `
+<model-viewer src="${iterData.hm_glb}" alt="Iter ${iterNum} Heatmap" auto-rotate camera-controls shadow-intensity="1"
+    environment-image="neutral" style="width: 100%; height: 100%; display: block;">
+</model-viewer>
+
+<div
+    style="position:absolute; bottom:10px; left:10px; z-index:5; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:6px; color:#fff; font-size:0.7rem; font-weight:700;">
+    ITER #${iterNum} TOPOLOGY MAP
+</div>
+`;
+        } else {
+            viewport.innerHTML = `
+<div class="hm-panel-placeholder" style="border-style:solid; border-color:rgba(102,126,234,0.2);">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span style="font-size:0.85rem; color:#a0aec0;">Iteration ${iterNum}</span>
+    <span style="font-size:0.6rem;">Missing Binary Map</span>
+</div>
+`;
+        }
+
+        // Update timeline highlights
+        if (strip) {
+            strip.querySelectorAll('.hm-iter-thumb').forEach(t => {
+                t.classList.remove('selected-' + panel);
+                if (t.dataset.iter === iterNum) {
+                    t.classList.add('selected-' + panel);
+                }
+            });
+        }
+
+        // Sync the dropdown
+        selectEl.value = iterNum;
+    }
+
+    // Click on timeline thumbnail to select for Panel A (or Shift+Click for Panel B)
+    function selectIterThumb(event, thumbEl) {
+        const artifactNum = thumbEl.dataset.artifact;
+        const iterNum = thumbEl.dataset.iter;
+        const panel = event.shiftKey ? 'b' : 'a';
+
+        // Find and update the corresponding dropdown
+        const card = thumbEl.closest('.heatmap-compare-card');
+        const select = card.querySelector('.hm-select-' + panel + '[data-artifact="' + artifactNum + '"]');
+        if (select) {
+            select.value = iterNum;
+            updateHeatmapPanel(select, panel);
+        }
+    }
+
+    // Auto-expand the first heatmap card on page load for better UX
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstHeader = document.querySelector('.hm-card-header');
+        if (firstHeader) {
+            // Small delay so AOS animations finish first
+            setTimeout(() => toggleHeatmapCard(firstHeader), 1500);
+        }
+    });
+
+    // ===== Delete Artifact =====
+    async function deleteArtifact(slug, cardIndex, isUserGenerated, sessionId) {
+        const confirmMsg = isUserGenerated
+            ? 'Delete this generated artifact permanently? This will remove the 3D model and all associated files.'
+            : 'Delete this museum artifact permanently? This will remove all iteration meshes and heatmap data.';
+
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            let endpoint, method, headers, body;
+            if (isUserGenerated && sessionId) {
+                endpoint = '/api/delete/' + sessionId + '/';
+                method = 'POST';
+                headers = { 'Content-Type': 'application/json' };
+                body = null;
+            } else {
+                endpoint = '/api/delete-museum/' + encodeURIComponent(slug) + '/';
+                method = 'POST';
+                headers = { 'Content-Type': 'application/json' };
+                body = null;
+            }
+
+            const response = await fetch(endpoint, { method, headers });
+            const data = await response.json();
+
+            if (data.success) {
+                // Remove the artifact card from gallery
+                const card = document.getElementById('artifact-card-' + cardIndex);
+                if (card) {
+                    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    setTimeout(() => card.remove(), 400);
+                }
+
+                // Remove the corresponding heatmap comparison card
+                const hmCards = document.querySelectorAll('.heatmap-compare-card');
+                if (hmCards[cardIndex - 1]) {
+                    const hm = hmCards[cardIndex - 1];
+                    hm.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    hm.style.opacity = '0';
+                    hm.style.transform = 'scale(0.8)';
+                    setTimeout(() => hm.remove(), 400);
+                }
+            } else {
+                alert('Failed to delete: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            alert('Error deleting artifact: ' + err.message);
+        }
+    }
+
+</script>
+{% endblock %}

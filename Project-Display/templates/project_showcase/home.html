@@ -1,0 +1,559 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Single Image 3D Reconstruction | Final Year Project{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-particles" id="particles-js"></div>
+    <div class="container hero-content">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-7" data-aos="fade-right">
+                <span class="badge bg-primary mb-3 px-3 py-2">
+                    <i class="fas fa-graduation-cap me-1"></i> Final Year Project 2025
+                </span>
+                <h1 class="hero-title">
+                    Single Image<br>
+                    <span class="gradient-text">3D Reconstruction</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Generating detailed three-dimensional models from a single two-dimensional image
+                    using advanced diffusion models, 3D Gaussian Splatting, and feedforward 3D editing.
+                </p>
+                <div class="hero-buttons mt-4">
+                    <a href="{% url 'project_showcase:about' %}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                    <a href="{% url 'project_showcase:demo' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-play-circle me-2"></i>View Demo
+                    </a>
+                </div>
+                <div class="hero-stats mt-5">
+                    <div class="row g-4">
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <h3 class="stat-number">240x</h3>
+                                <p class="stat-label">Faster Generation</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <h3 class="stat-number">70%</h3>
+                                <p class="stat-label">Faster Rendering</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <h3 class="stat-number">25s</h3>
+                                <p class="stat-label">Avg. Generation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block" data-aos="fade-left">
+                <div class="hero-image-container">
+                    <div class="hero-3d-cube">
+                        <div class="cube">
+                            <div class="face front"></div>
+                            <div class="face back"></div>
+                            <div class="face right"></div>
+                            <div class="face left"></div>
+                            <div class="face top"></div>
+                            <div class="face bottom"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll-indicator">
+        <a href="#overview" class="scroll-down">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </div>
+</section>
+
+<!-- Project Overview Section -->
+<section id="overview" class="section-padding bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <span class="section-badge">About the Project</span>
+                <h2 class="section-title">Transforming 2D Images into 3D Reality</h2>
+                <p class="text-muted mb-4">
+                    This project focuses on generating detailed three-dimensional models from a single
+                    two-dimensional image using recent advances in generative modeling and feedforward 3D editing.
+                </p>
+                <p class="text-muted mb-4">
+                    Traditional 3D reconstruction relies on multiple calibrated images or depth sensors,
+                    which limits scalability and accessibility. Our approach integrates <strong>diffusion-based
+                        priors</strong>,
+                    <strong>camera-conditioned score distillation</strong>, <strong>3D Gaussian Splatting</strong>,
+                    and <strong>feedforward 3D editing</strong> capabilities.
+                </p>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-primary me-2"></i>
+                        <span>Monocular depth estimation for initialization</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-primary me-2"></i>
+                        <span>Camera-aware diffusion optimization</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-primary me-2"></i>
+                        <span>Real-time rendering with Gaussian Splatting</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-primary me-2"></i>
+                        <span>Text-guided 3D editing capabilities</span>
+                    </div>
+                </div>
+                <a href="{% url 'project_showcase:about' %}" class="btn btn-primary mt-4">
+                    Read Full Abstract <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="overview-image-container">
+                    <img src="{% static 'images/screenshots/ultrashape_buddha_1.png' %}" alt="3D Reconstruction Demo"
+                        class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Core Capabilities</span>
+            <h2 class="section-title">Key Features & Modules</h2>
+            <p class="section-subtitle">
+                Our integrated framework combines optimization-based reconstruction with feedforward direct asset
+                manipulation
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h4>Single Image Input</h4>
+                    <p>Generate complete 3D models from just one 2D photograph, eliminating the need for multiple camera
+                        views or depth sensors.</p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>Diffusion-Based Priors</h4>
+                    <p>Leverage powerful 2D diffusion models trained on large-scale datasets to infer plausible 3D
+                        structures from single views.</p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <h4>3D Gaussian Splatting</h4>
+                    <p>Achieve real-time high-fidelity rendering using millions of optimized Gaussian ellipsoids for
+                        efficient scene representation.</p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4>Feedforward 3D Editing</h4>
+                    <p>Directly generate and edit complete 3D assets through natural language instructions in just 20-30
+                        seconds.</p>
+                </div>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h4>Depth Estimation</h4>
+                    <p>Monocular depth estimation and surface normal prediction for accurate geometric initialization
+                        and faster convergence.</p>
+                </div>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h4>Multi-View Consistency</h4>
+                    <p>Camera-conditioned score distillation ensures geometric consistency across multiple virtual
+                        viewpoints.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'project_showcase:features' %}" class="btn btn-outline-primary btn-lg">
+                Explore All Features <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Stack Section -->
+<section class="section-padding bg-dark text-white">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Technology</span>
+            <h2 class="section-title text-white">Technology Stack</h2>
+            <p class="section-subtitle text-muted">
+                Built with cutting-edge deep learning frameworks and 3D vision technologies
+            </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-6 col-md-4 col-lg-2" data-aos="zoom-in" data-aos-delay="100">
+                <div class="tech-card">
+                    <i class="fab fa-python"></i>
+                    <span>Python</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="zoom-in" data-aos-delay="150">
+                <div class="tech-card">
+                    <i class="fas fa-fire"></i>
+                    <span>PyTorch</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="zoom-in" data-aos-delay="200">
+                <div class="tech-card">
+                    <i class="fas fa-cube"></i>
+                    <span>3DGS</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="zoom-in" data-aos-delay="250">
+                <div class="tech-card">
+                    <i class="fas fa-robot"></i>
+                    <span>Hunyuan3D</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="zoom-in" data-aos-delay="300">
+                <div class="tech-card">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>Qwen2-VL</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="zoom-in" data-aos-delay="350">
+                <div class="tech-card">
+                    <i class="fab fa-docker"></i>
+                    <span>Docker</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'project_showcase:technology' %}" class="btn btn-outline-light btn-lg">
+                View Full Tech Stack <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Pipeline Overview Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Architecture</span>
+            <h2 class="section-title">System Pipeline</h2>
+            <p class="section-subtitle">
+                A multi-stage architecture ensuring flexibility, scalability, and adaptability
+            </p>
+        </div>
+
+        <div class="pipeline-container" data-aos="fade-up">
+            <div class="row g-0">
+                <div class="col-lg-4">
+                    <div class="pipeline-stage stage-1">
+                        <div class="stage-number">I</div>
+                        <h4>Geometric Inference</h4>
+                        <p>Monocular depth estimation and importance-sampled point cloud generation from single RGB
+                            image.</p>
+                        <ul class="stage-features">
+                            <li><i class="fas fa-check"></i> Depth Estimation</li>
+                            <li><i class="fas fa-check"></i> Surface Normal Prediction</li>
+                            <li><i class="fas fa-check"></i> Point Cloud Generation</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="pipeline-stage stage-2">
+                        <div class="stage-number">II</div>
+                        <h4>Diffusion-Guided Optimization</h4>
+                        <p>Camera-conditioned score distillation with 3D Gaussian Splatting for real-time rendering.</p>
+                        <ul class="stage-features">
+                            <li><i class="fas fa-check"></i> Gaussian Representation</li>
+                            <li><i class="fas fa-check"></i> Camera-Aware SDS</li>
+                            <li><i class="fas fa-check"></i> Mesh Extraction</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="pipeline-stage stage-3">
+                        <div class="stage-number">III</div>
+                        <h4>Feedforward Editing</h4>
+                        <p>Rapid 3D asset generation and direct editing using Qwen2509 + Hunyuan3D pipeline.</p>
+                        <ul class="stage-features">
+                            <li><i class="fas fa-check"></i> Text-to-3D Generation</li>
+                            <li><i class="fas fa-check"></i> Image-to-3D Conversion</li>
+                            <li><i class="fas fa-check"></i> Direct Asset Editing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'project_showcase:architecture' %}" class="btn btn-primary btn-lg">
+                View Full Architecture <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Results Highlights Section -->
+<section class="section-padding bg-gradient-primary text-white">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Results</span>
+            <h2 class="section-title text-white">Key Achievements</h2>
+            <p class="section-subtitle text-light">
+                Quantitative and qualitative results validating our approach
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="result-card">
+                    <div class="result-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3 class="result-number">70%</h3>
+                    <p class="result-label">Reduced Rendering Time</p>
+                    <small>Compared to NeRF-based methods</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="result-card">
+                    <div class="result-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="result-number">25s</h3>
+                    <p class="result-label">Average Generation Time</p>
+                    <small>For feedforward 3D editing</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="result-card">
+                    <div class="result-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="result-number">108x</h3>
+                    <p class="result-label">Faster Than SPARC3D</p>
+                    <small>Feedforward vs optimization</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="result-card">
+                    <div class="result-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="result-number">20%</h3>
+                    <p class="result-label">Fewer Iterations</p>
+                    <small>With KNN importance sampling</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'project_showcase:results' %}" class="btn btn-light btn-lg">
+                View Detailed Results <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Our Team</span>
+            <h2 class="section-title">Meet the Developers</h2>
+            <p class="section-subtitle">
+                Department of Electronics and Computer Engineering, IOE Pulchowk Campus
+            </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% if team_members %}
+            {% for member in team_members %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+                <div class="team-card">
+                    <div class="team-image">
+                        {% if member.photo %}
+                        <img src="{{ member.photo.url }}" alt="{{ member.name }}">
+                        {% else %}
+                        <div class="team-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="team-info">
+                        <h4>{{ member.name }}</h4>
+                        <p class="team-roll">{{ member.roll_number }}</p>
+                        <p class="team-role">{{ member.role }}</p>
+                        <div class="team-social">
+                            {% if member.github_url %}
+                            <a href="{{ member.github_url }}" target="_blank"><i class="fab fa-github"></i></a>
+                            {% endif %}
+                            {% if member.linkedin_url %}
+                            <a href="{{ member.linkedin_url }}" target="_blank"><i class="fab fa-linkedin"></i></a>
+                            {% endif %}
+                            {% if member.email %}
+                            <a href="mailto:{{ member.email }}"><i class="fas fa-envelope"></i></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <!-- Default team members if none in database -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="team-card">
+                    <div class="team-image">
+                        <div class="team-avatar"><i class="fas fa-user"></i></div>
+                    </div>
+                    <div class="team-info">
+                        <h4>Anish Bishwakarma</h4>
+                        <p class="team-roll">PUL078BCT011</p>
+                        <p class="team-role">Developer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="team-card">
+                    <div class="team-image">
+                        <div class="team-avatar"><i class="fas fa-user"></i></div>
+                    </div>
+                    <div class="team-info">
+                        <h4>Ankit Belbase</h4>
+                        <p class="team-roll">PUL078BCT013</p>
+                        <p class="team-role">Developer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="team-card">
+                    <div class="team-image">
+                        <div class="team-avatar"><i class="fas fa-user"></i></div>
+                    </div>
+                    <div class="team-info">
+                        <h4>Dipan Bartaula</h4>
+                        <p class="team-roll">PUL078BCT040</p>
+                        <p class="team-role">Developer</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'project_showcase:team' %}" class="btn btn-outline-primary btn-lg">
+                View Full Team <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Applications Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Applications</span>
+            <h2 class="section-title">Real-World Applications</h2>
+            <p class="section-subtitle">
+                Potential use cases for single-image 3D reconstruction technology
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="application-card">
+                    <i class="fas fa-vr-cardboard"></i>
+                    <h5>AR/VR Content</h5>
+                    <p>Create immersive 3D content for augmented and virtual reality applications.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="application-card">
+                    <i class="fas fa-landmark"></i>
+                    <h5>Digital Heritage</h5>
+                    <p>Preserve cultural artifacts and historical monuments in digital 3D format.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="application-card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h5>E-Commerce</h5>
+                    <p>Generate 3D product visualizations for enhanced online shopping experiences.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="application-card">
+                    <i class="fas fa-gamepad"></i>
+                    <h5>Gaming & Entertainment</h5>
+                    <p>Rapid 3D asset creation for game development and digital entertainment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8" data-aos="fade-right">
+                <h2>Ready to Explore Our Project?</h2>
+                <p class="text-muted">
+                    Learn more about our methodology, view detailed results, or get in touch with the team.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end" data-aos="fade-left">
+                <a href="{% url 'project_showcase:contact' %}" class="btn btn-primary btn-lg">
+                    Contact Us <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

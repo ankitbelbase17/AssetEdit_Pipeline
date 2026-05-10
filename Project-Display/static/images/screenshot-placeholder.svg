@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d3748;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a202c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#grad)"/>
+  <rect x="50" y="50" width="200" height="150" fill="rgba(102,126,234,0.2)" rx="10"/>
+  <text x="150" y="140" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="middle">Input Image</text>
+  <polygon points="280,125 320,100 320,150" fill="rgba(102,126,234,0.5)"/>
+  <rect x="350" y="50" width="200" height="150" fill="rgba(118,75,162,0.2)" rx="10"/>
+  <text x="450" y="140" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="middle">3D Model</text>
+  <text x="300" y="280" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.4)" text-anchor="middle">Screenshot Placeholder</text>
+  <text x="300" y="320" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.3)" text-anchor="middle">Replace with actual screenshot</text>
+</svg>

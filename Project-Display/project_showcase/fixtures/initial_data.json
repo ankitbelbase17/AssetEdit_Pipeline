@@ -1,0 +1,499 @@
+[
+  {
+    "model": "project_showcase.projectinfo",
+    "pk": 1,
+    "fields": {
+      "title": "Single Image 3D Reconstruction",
+      "short_title": "SI3DR",
+      "tagline": "Transform Photos into Immersive 3D Models",
+      "abstract": "This project presents a comprehensive framework for generating and editing 3D assets from a single image, combining multi-view diffusion models, neural radiance representations, and vision-language understanding. The system addresses the fundamental challenge of 3D reconstruction from 2D images—an inherently ill-posed problem due to depth ambiguity and occluded geometry—by leveraging recent advances in generative AI, particularly large-scale diffusion priors and vision-language models.",
+      "problem_statement": "Traditional 3D reconstruction requires multi-view imagery, depth sensors, or manual modeling—limiting accessibility for casual users and rapid prototyping scenarios. While recent diffusion-based approaches have enabled 3D generation from single images, they remain slow (often taking tens of minutes per object) and offer limited control over editing or refinement.",
+      "institution": "Tribhuvan University, Institute of Engineering, Pulchowk Campus",
+      "department": "Department of Electronics and Computer Engineering",
+      "submission_date": "December 2025"
+    }
+  },
+  {
+    "model": "project_showcase.objective",
+    "pk": 1,
+    "fields": {
+      "title": "Develop Multi-View Diffusion Pipeline",
+      "description": "Design an optimization-based reconstruction pipeline using DreamGaussian and Zero-1-to-3++ to generate geometrically consistent multi-view images from a single input.",
+      "order": 1,
+      "icon": "fas fa-eye"
+    }
+  },
+  {
+    "model": "project_showcase.objective",
+    "pk": 2,
+    "fields": {
+      "title": "Integrate Fast Feedforward Generation",
+      "description": "Incorporate Hunyuan3D-1.0 for rapid single-shot 3D reconstruction, reducing generation time from 45+ minutes to under 25 seconds while maintaining quality.",
+      "order": 2,
+      "icon": "fas fa-bolt"
+    }
+  },
+  {
+    "model": "project_showcase.objective",
+    "pk": 3,
+    "fields": {
+      "title": "Enable Language-Guided Editing",
+      "description": "Develop a feedforward editing pipeline using Qwen2-VL and Qwen2.5-Coder to support natural language-guided 3D asset modifications.",
+      "order": 3,
+      "icon": "fas fa-comments"
+    }
+  },
+  {
+    "model": "project_showcase.objective",
+    "pk": 4,
+    "fields": {
+      "title": "Comprehensive Evaluation Framework",
+      "description": "Establish comprehensive quality and speed benchmarks comparing both pipelines across diverse object categories.",
+      "order": 4,
+      "icon": "fas fa-chart-bar"
+    }
+  },
+  {
+    "model": "project_showcase.teammember",
+    "pk": 1,
+    "fields": {
+      "name": "Anish Bishwakarma",
+      "roll_number": "PUL078BCT011",
+      "email": "",
+      "role": "Developer",
+      "linkedin_url": "",
+      "github_url": "",
+      "order": 1
+    }
+  },
+  {
+    "model": "project_showcase.teammember",
+    "pk": 2,
+    "fields": {
+      "name": "Ankit Belbase",
+      "roll_number": "PUL078BCT013",
+      "email": "",
+      "role": "Developer",
+      "linkedin_url": "",
+      "github_url": "",
+      "order": 2
+    }
+  },
+  {
+    "model": "project_showcase.teammember",
+    "pk": 3,
+    "fields": {
+      "name": "Dipan Bartaula",
+      "roll_number": "PUL078BCT040",
+      "email": "",
+      "role": "Developer",
+      "linkedin_url": "",
+      "github_url": "",
+      "order": 3
+    }
+  },
+  {
+    "model": "project_showcase.supervisor",
+    "pk": 1,
+    "fields": {
+      "name": "Jyoti Tandukar",
+      "title": "Assoc. Prof. Dr.",
+      "email": "",
+      "role": "Project Supervisor",
+      "order": 1
+    }
+  },
+  {
+    "model": "project_showcase.supervisor",
+    "pk": 2,
+    "fields": {
+      "name": "Bibha Sthapit",
+      "title": "Asst. Prof.",
+      "email": "",
+      "role": "Project Management Team",
+      "order": 2
+    }
+  },
+  {
+    "model": "project_showcase.supervisor",
+    "pk": 3,
+    "fields": {
+      "name": "Bikal Adhikari",
+      "title": "Asst. Prof.",
+      "email": "",
+      "role": "Project Management Team",
+      "order": 3
+    }
+  },
+  {
+    "model": "project_showcase.technology",
+    "pk": 1,
+    "fields": {
+      "name": "Python 3.10+",
+      "description": "Primary development language for all pipeline components",
+      "category": "language",
+      "icon": "fab fa-python",
+      "url": "",
+      "order": 1
+    }
+  },
+  {
+    "model": "project_showcase.technology",
+    "pk": 2,
+    "fields": {
+      "name": "PyTorch 2.0",
+      "description": "Deep learning framework with CUDA acceleration",
+      "category": "framework",
+      "icon": "fas fa-fire",
+      "url": "",
+      "order": 2
+    }
+  },
+  {
+    "model": "project_showcase.technology",
+    "pk": 3,
+    "fields": {
+      "name": "Hunyuan3D-1.0",
+      "description": "Tencent's feedforward 3D generation model",
+      "category": "model",
+      "icon": "fas fa-cube",
+      "url": "",
+      "order": 3
+    }
+  },
+  {
+    "model": "project_showcase.technology",
+    "pk": 4,
+    "fields": {
+      "name": "Qwen2-VL",
+      "description": "Vision-language model for understanding and editing",
+      "category": "model",
+      "icon": "fas fa-eye",
+      "url": "",
+      "order": 4
+    }
+  },
+  {
+    "model": "project_showcase.technology",
+    "pk": 5,
+    "fields": {
+      "name": "DreamGaussian",
+      "description": "Optimization-based 3D Gaussian generation",
+      "category": "model",
+      "icon": "fas fa-cubes",
+      "url": "",
+      "order": 5
+    }
+  },
+  {
+    "model": "project_showcase.technology",
+    "pk": 6,
+    "fields": {
+      "name": "Docker",
+      "description": "Containerization for reproducible deployment",
+      "category": "tool",
+      "icon": "fab fa-docker",
+      "url": "",
+      "order": 6
+    }
+  },
+  {
+    "model": "project_showcase.technology",
+    "pk": 7,
+    "fields": {
+      "name": "NVIDIA A100 40GB",
+      "description": "High-memory GPU for model inference",
+      "category": "hardware",
+      "icon": "fas fa-microchip",
+      "url": "",
+      "order": 7
+    }
+  },
+  {
+    "model": "project_showcase.systemphase",
+    "pk": 1,
+    "fields": {
+      "title": "Background Removal",
+      "description": "Automatic subject isolation using Segment-Anything-style segmentation",
+      "phase_number": 1,
+      "details": "",
+      "icon": "fas fa-cut"
+    }
+  },
+  {
+    "model": "project_showcase.systemphase",
+    "pk": 2,
+    "fields": {
+      "title": "Multi-View Generation",
+      "description": "Generate 6+ consistent views using Zero-1-to-3++ diffusion",
+      "phase_number": 2,
+      "details": "",
+      "icon": "fas fa-images"
+    }
+  },
+  {
+    "model": "project_showcase.systemphase",
+    "pk": 3,
+    "fields": {
+      "title": "Gaussian Initialization",
+      "description": "Initialize 3D Gaussian point cloud from multi-view depth estimation",
+      "phase_number": 3,
+      "details": "",
+      "icon": "fas fa-cloud"
+    }
+  },
+  {
+    "model": "project_showcase.systemphase",
+    "pk": 4,
+    "fields": {
+      "title": "SDS Optimization",
+      "description": "Refine Gaussians using Score Distillation Sampling loss",
+      "phase_number": 4,
+      "details": "",
+      "icon": "fas fa-sync"
+    }
+  },
+  {
+    "model": "project_showcase.systemphase",
+    "pk": 5,
+    "fields": {
+      "title": "Mesh Extraction",
+      "description": "Extract mesh geometry from optimized Gaussian representation",
+      "phase_number": 5,
+      "details": "",
+      "icon": "fas fa-cube"
+    }
+  },
+  {
+    "model": "project_showcase.feature",
+    "pk": 1,
+    "fields": {
+      "title": "Single Image Input",
+      "description": "Generate complete 3D models from just one photograph - no multi-view capture or depth sensors required.",
+      "technical_details": "",
+      "icon": "fas fa-image",
+      "order": 1
+    }
+  },
+  {
+    "model": "project_showcase.feature",
+    "pk": 2,
+    "fields": {
+      "title": "108x Faster Generation",
+      "description": "Feedforward pipeline generates 3D models in ~25 seconds compared to 45+ minutes for optimization-based methods.",
+      "technical_details": "",
+      "icon": "fas fa-bolt",
+      "order": 2
+    }
+  },
+  {
+    "model": "project_showcase.feature",
+    "pk": 3,
+    "fields": {
+      "title": "Natural Language Editing",
+      "description": "Modify 3D assets using simple text instructions like 'make it red' or 'add wooden texture'.",
+      "technical_details": "",
+      "icon": "fas fa-comments",
+      "order": 3
+    }
+  },
+  {
+    "model": "project_showcase.feature",
+    "pk": 4,
+    "fields": {
+      "title": "Multi-Format Export",
+      "description": "Export to industry-standard formats including OBJ, GLB, GLTF, and PLY for use in any 3D software.",
+      "technical_details": "",
+      "icon": "fas fa-file-export",
+      "order": 4
+    }
+  },
+  {
+    "model": "project_showcase.feature",
+    "pk": 5,
+    "fields": {
+      "title": "Real-Time Preview",
+      "description": "Gaussian splatting enables 70% faster rendering for immediate visual feedback.",
+      "technical_details": "",
+      "icon": "fas fa-eye",
+      "order": 5
+    }
+  },
+  {
+    "model": "project_showcase.feature",
+    "pk": 6,
+    "fields": {
+      "title": "Automatic Background Removal",
+      "description": "AI-powered segmentation automatically isolates subjects from complex backgrounds.",
+      "technical_details": "",
+      "icon": "fas fa-magic",
+      "order": 6
+    }
+  },
+  {
+    "model": "project_showcase.result",
+    "pk": 1,
+    "fields": {
+      "title": "Feedforward Speed",
+      "description": "Faster than optimization-based methods (25 sec vs 45+ min)",
+      "metric_value": "108x",
+      "metric_label": "Speed Improvement",
+      "icon": "fas fa-bolt",
+      "order": 1
+    }
+  },
+  {
+    "model": "project_showcase.result",
+    "pk": 2,
+    "fields": {
+      "title": "Rendering Speed",
+      "description": "Faster real-time preview with Gaussian splatting",
+      "metric_value": "70%",
+      "metric_label": "Faster Rendering",
+      "icon": "fas fa-tachometer-alt",
+      "order": 2
+    }
+  },
+  {
+    "model": "project_showcase.result",
+    "pk": 3,
+    "fields": {
+      "title": "Iteration Reduction",
+      "description": "Fewer optimization iterations with staged approach",
+      "metric_value": "20%",
+      "metric_label": "Fewer Iterations",
+      "icon": "fas fa-sync",
+      "order": 3
+    }
+  },
+  {
+    "model": "project_showcase.result",
+    "pk": 4,
+    "fields": {
+      "title": "Edit Speed",
+      "description": "Faster than iterative editing methods",
+      "metric_value": "240x",
+      "metric_label": "Edit Speedup",
+      "icon": "fas fa-edit",
+      "order": 4
+    }
+  },
+  {
+    "model": "project_showcase.futurescope",
+    "pk": 1,
+    "fields": {
+      "title": "Hybrid Pipeline Integration",
+      "description": "Unified interface enabling seamless transition between feedforward initialization and optimization-based refinement.",
+      "category": "reconstruction",
+      "icon": "fas fa-code-branch",
+      "order": 1
+    }
+  },
+  {
+    "model": "project_showcase.futurescope",
+    "pk": 2,
+    "fields": {
+      "title": "Part-Level Editing",
+      "description": "3D semantic segmentation using PartNet for precise part-specific edits while preserving other regions.",
+      "category": "editing",
+      "icon": "fas fa-puzzle-piece",
+      "order": 2
+    }
+  },
+  {
+    "model": "project_showcase.futurescope",
+    "pk": 3,
+    "fields": {
+      "title": "Model Compression",
+      "description": "INT8/INT4 quantization and knowledge distillation to reduce memory by 50-70% for consumer GPUs.",
+      "category": "system",
+      "icon": "fas fa-compress-alt",
+      "order": 3
+    }
+  },
+  {
+    "model": "project_showcase.futurescope",
+    "pk": 4,
+    "fields": {
+      "title": "Web-Based Interface",
+      "description": "Browser-based editing with WebGPU-powered Gaussian splatting preview for accessible deployment.",
+      "category": "system",
+      "icon": "fas fa-globe",
+      "order": 4
+    }
+  },
+  {
+    "model": "project_showcase.limitation",
+    "pk": 1,
+    "fields": {
+      "title": "High GPU Memory Requirements",
+      "description": "Full pipeline requires 40GB+ VRAM for optimal performance, limiting accessibility on consumer hardware.",
+      "category": "system",
+      "order": 1
+    }
+  },
+  {
+    "model": "project_showcase.limitation",
+    "pk": 2,
+    "fields": {
+      "title": "Quality vs Speed Trade-off",
+      "description": "Feedforward pipeline sacrifices some geometric detail for speed compared to optimization-based approach.",
+      "category": "reconstruction",
+      "order": 2
+    }
+  },
+  {
+    "model": "project_showcase.limitation",
+    "pk": 3,
+    "fields": {
+      "title": "Single Object Focus",
+      "description": "Current pipeline handles single isolated objects; complex scenes with multiple objects not yet supported.",
+      "category": "reconstruction",
+      "order": 3
+    }
+  },
+  {
+    "model": "project_showcase.methodology",
+    "pk": 1,
+    "fields": {
+      "step_number": 1,
+      "title": "Literature Survey & Requirements Analysis",
+      "description": "Comprehensive review of existing 3D reconstruction methods, identification of research gaps, and requirement specification.",
+      "technical_details": "",
+      "icon": "fas fa-search"
+    }
+  },
+  {
+    "model": "project_showcase.methodology",
+    "pk": 2,
+    "fields": {
+      "step_number": 2,
+      "title": "Algorithm Design",
+      "description": "Selection and integration of DreamGaussian, Zero-1-to-3++, Hunyuan3D-1.0, and Qwen2-VL components.",
+      "technical_details": "",
+      "icon": "fas fa-project-diagram"
+    }
+  },
+  {
+    "model": "project_showcase.methodology",
+    "pk": 3,
+    "fields": {
+      "step_number": 3,
+      "title": "Implementation",
+      "description": "Development of both optimization-based and feedforward pipelines with modular architecture.",
+      "technical_details": "",
+      "icon": "fas fa-code"
+    }
+  },
+  {
+    "model": "project_showcase.methodology",
+    "pk": 4,
+    "fields": {
+      "step_number": 4,
+      "title": "Testing & Evaluation",
+      "description": "Comprehensive benchmarking across quality metrics, speed measurements, and user studies.",
+      "technical_details": "",
+      "icon": "fas fa-check-double"
+    }
+  }
+]

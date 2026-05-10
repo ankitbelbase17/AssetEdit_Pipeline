@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Technology Stack | Single Image 3D Reconstruction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">Technology Stack</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Technology</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Overview Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <span class="section-badge">Overview</span>
+                <h2 class="section-title">Cutting-Edge Technologies</h2>
+                <p class="text-muted">
+                    Our Single Image 3D Reconstruction system leverages a comprehensive stack of 
+                    modern deep learning frameworks, computer vision libraries, and 3D generation 
+                    models to achieve state-of-the-art results.
+                </p>
+                <p class="text-muted">
+                    The system is built on a foundation of PyTorch for deep learning, with specialized 
+                    components for diffusion-based generation, Gaussian splatting, and multimodal 
+                    language understanding.
+                </p>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="tech-overview-grid">
+                    <div class="tech-overview-item">
+                        <i class="fab fa-python"></i>
+                        <span>Python 3.10+</span>
+                    </div>
+                    <div class="tech-overview-item">
+                        <i class="fas fa-fire"></i>
+                        <span>PyTorch</span>
+                    </div>
+                    <div class="tech-overview-item">
+                        <i class="fas fa-cube"></i>
+                        <span>3DGS</span>
+                    </div>
+                    <div class="tech-overview-item">
+                        <i class="fab fa-docker"></i>
+                        <span>Docker</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Programming Languages -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Languages</span>
+            <h2 class="section-title">Programming Languages</h2>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="tech-detail-card">
+                    <div class="tech-icon python">
+                        <i class="fab fa-python"></i>
+                    </div>
+                    <h4>Python 3.10+</h4>
+                    <p>
+                        Primary programming language for the entire project. Python's rich ecosystem 
+                        of scientific computing and deep learning libraries makes it ideal for 
+                        computer vision and 3D generation tasks.
+                    </p>
+                    <ul class="tech-features">
+                        <li>NumPy for numerical operations</li>
+                        <li>Extensive ML/DL library support</li>
+                        <li>Easy prototyping and debugging</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="tech-detail-card">
+                    <div class="tech-icon cuda">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h4>CUDA</h4>
+                    <p>
+                        NVIDIA's parallel computing platform for GPU acceleration. Essential for 
+                        training deep learning models and running real-time Gaussian splatting 
+                        rendering operations.
+                    </p>
+                    <ul class="tech-features">
+                        <li>GPU-accelerated computing</li>
+                        <li>Custom CUDA kernels for 3DGS</li>
+                        <li>Parallel processing support</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="tech-detail-card">
+                    <div class="tech-icon cpp">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h4>C++</h4>
+                    <p>
+                        Used for performance-critical components including CUDA extensions, 
+                        differentiable rendering backends, and mesh processing operations.
+                    </p>
+                    <ul class="tech-features">
+                        <li>PyTorch C++ extensions</li>
+                        <li>High-performance rendering</li>
+                        <li>Memory-efficient operations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Deep Learning Frameworks -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Frameworks</span>
+            <h2 class="section-title">Deep Learning Frameworks</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="framework-card">
+                    <div class="framework-header">
+                        <i class="fas fa-fire text-orange"></i>
+                        <h4>PyTorch 2.0+</h4>
+                    </div>
+                    <p>
+                        The primary deep learning framework powering all neural network components. 
+                        PyTorch's dynamic computation graph and extensive ecosystem make it ideal 
+                        for research and production.
+                    </p>
+                    <div class="framework-uses">
+                        <span class="use-tag">Diffusion Models</span>
+                        <span class="use-tag">Neural Networks</span>
+                        <span class="use-tag">Optimization</span>
+                        <span class="use-tag">GPU Training</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="framework-card">
+                    <div class="framework-header">
+                        <i class="fas fa-hug text-yellow"></i>
+                        <h4>Hugging Face Transformers</h4>
+                    </div>
+                    <p>
+                        State-of-the-art library for transformer-based models. Used for loading 
+                        and running pre-trained models including diffusion models and vision-language 
+                        models like Qwen2-VL.
+                    </p>
+                    <div class="framework-uses">
+                        <span class="use-tag">Model Loading</span>
+                        <span class="use-tag">Tokenization</span>
+                        <span class="use-tag">Inference</span>
+                        <span class="use-tag">Fine-tuning</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="framework-card">
+                    <div class="framework-header">
+                        <i class="fas fa-image text-blue"></i>
+                        <h4>Diffusers</h4>
+                    </div>
+                    <p>
+                        Hugging Face's library for diffusion models. Provides implementations of 
+                        Stable Diffusion, Zero123, and other diffusion-based generative models 
+                        used for view synthesis.
+                    </p>
+                    <div class="framework-uses">
+                        <span class="use-tag">Stable Diffusion</span>
+                        <span class="use-tag">Zero123</span>
+                        <span class="use-tag">SDS Optimization</span>
+                        <span class="use-tag">Image Generation</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="framework-card">
+                    <div class="framework-header">
+                        <i class="fas fa-eye text-green"></i>
+                        <h4>OpenCV & Pillow</h4>
+                    </div>
+                    <p>
+                        Essential libraries for image processing, manipulation, and computer vision 
+                        operations. Used throughout the pipeline for preprocessing, augmentation, 
+                        and visualization.
+                    </p>
+                    <div class="framework-uses">
+                        <span class="use-tag">Image I/O</span>
+                        <span class="use-tag">Preprocessing</span>
+                        <span class="use-tag">Visualization</span>
+                        <span class="use-tag">Transformations</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3D & ML Models -->
+<section class="section-padding bg-dark text-white">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge-light">Models</span>
+            <h2 class="section-title text-white">Key ML Models & Representations</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="model-card">
+                    <div class="model-icon">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <h4>3D Gaussian Splatting</h4>
+                    <p>
+                        Novel 3D representation using millions of anisotropic Gaussian ellipsoids. 
+                        Enables real-time high-fidelity rendering through efficient rasterization.
+                    </p>
+                    <div class="model-stats">
+                        <div class="stat"><strong>70%</strong><span>Faster Rendering</span></div>
+                        <div class="stat"><strong>Real-time</strong><span>1080p Display</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="model-card">
+                    <div class="model-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h4>Hunyuan3D-1.0</h4>
+                    <p>
+                        Feedforward 3D generator for rapid asset creation. Directly produces complete 
+                        3D representations from text or image inputs in a single forward pass.
+                    </p>
+                    <div class="model-stats">
+                        <div class="stat"><strong>25s</strong><span>Generation Time</span></div>
+                        <div class="stat"><strong>Direct</strong><span>3D Output</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="model-card">
+                    <div class="model-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <h4>Qwen2-VL (Qwen2509)</h4>
+                    <p>
+                        Multimodal vision-language model for instruction parsing and structured 
+                        prompt generation. Enables natural language control over 3D editing operations.
+                    </p>
+                    <div class="model-stats">
+                        <div class="stat"><strong>Multi</strong><span>Modal Input</span></div>
+                        <div class="stat"><strong>Text</strong><span>Guided Editing</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="model-card">
+                    <div class="model-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h4>Zero123 / SyncDreamer</h4>
+                    <p>
+                        Viewpoint-conditioned diffusion models for novel view synthesis. Generate 
+                        consistent multi-view images from a single input for reconstruction.
+                    </p>
+                    <div class="model-stats">
+                        <div class="stat"><strong>Multi</strong><span>View Synthesis</span></div>
+                        <div class="stat"><strong>View</strong><span>Consistency</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="model-card">
+                    <div class="model-icon">
+                        <i class="fas fa-mountain"></i>
+                    </div>
+                    <h4>Monocular Depth Models</h4>
+                    <p>
+                        Deep learning models for estimating depth from single images. Provides 
+                        geometric priors for point cloud initialization and importance sampling.
+                    </p>
+                    <div class="model-stats">
+                        <div class="stat"><strong>Dense</strong><span>Depth Maps</span></div>
+                        <div class="stat"><strong>20%</strong><span>Faster Convergence</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="model-card">
+                    <div class="model-icon">
+                        <i class="fas fa-draw-polygon"></i>
+                    </div>
+                    <h4>DreamGaussian</h4>
+                    <p>
+                        Gaussian-based 3D generation framework combining SDS optimization with 
+                        efficient Gaussian representation for fast mesh generation.
+                    </p>
+                    <div class="model-stats">
+                        <div class="stat"><strong>Fast</strong><span>Optimization</span></div>
+                        <div class="stat"><strong>Mesh</strong><span>Export</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tools & Platforms -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Tools</span>
+            <h2 class="section-title">Tools & Platforms</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="tool-card">
+                    <i class="fab fa-docker"></i>
+                    <h5>Docker</h5>
+                    <p>Containerization for reproducible deployments and scalable processing.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="tool-card">
+                    <i class="fab fa-git-alt"></i>
+                    <h5>Git</h5>
+                    <p>Version control for collaborative development and code management.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="tool-card">
+                    <i class="fas fa-server"></i>
+                    <h5>NVIDIA A100</h5>
+                    <p>High-performance GPU infrastructure for training and inference.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="tool-card">
+                    <i class="fas fa-cloud"></i>
+                    <h5>Cloud Computing</h5>
+                    <p>Scalable cloud infrastructure for compute-intensive operations.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="tool-card">
+                    <i class="fas fa-cube"></i>
+                    <h5>Open3D</h5>
+                    <p>3D data processing library for point cloud and mesh operations.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="tool-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h5>Wandb</h5>
+                    <p>Experiment tracking and visualization for ML training runs.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+                <div class="tool-card">
+                    <i class="fas fa-book"></i>
+                    <h5>Jupyter</h5>
+                    <p>Interactive development environment for prototyping and analysis.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="800">
+                <div class="tool-card">
+                    <i class="fas fa-database"></i>
+                    <h5>ShapeNet / GSO</h5>
+                    <p>Standard 3D datasets for training and evaluation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Hardware Requirements -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Hardware</span>
+            <h2 class="section-title">Hardware Requirements</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="hardware-card">
+                    <h4><i class="fas fa-cloud me-2"></i>Cloud Computing Environment</h4>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <td><strong>GPU:</strong></td>
+                                <td>NVIDIA A100 (40GB VRAM)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CPU:</strong></td>
+                                <td>16+ cores</td>
+                            </tr>
+                            <tr>
+                                <td><strong>RAM:</strong></td>
+                                <td>64GB+</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Storage:</strong></td>
+                                <td>500GB+ SSD</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CUDA:</strong></td>
+                                <td>11.8+ / 12.x</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="hardware-card">
+                    <h4><i class="fas fa-desktop me-2"></i>Local Development</h4>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <td><strong>GPU:</strong></td>
+                                <td>NVIDIA RTX 3090/4090 (24GB VRAM)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CPU:</strong></td>
+                                <td>8+ cores</td>
+                            </tr>
+                            <tr>
+                                <td><strong>RAM:</strong></td>
+                                <td>32GB+</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Storage:</strong></td>
+                                <td>256GB+ SSD</td>
+                            </tr>
+                            <tr>
+                                <td><strong>OS:</strong></td>
+                                <td>Ubuntu 20.04+ / Windows 10+</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

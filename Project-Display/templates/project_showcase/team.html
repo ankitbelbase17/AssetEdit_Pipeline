@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Team | Single Image 3D Reconstruction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <h1 class="page-title">Our Team</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="{% url 'project_showcase:home' %}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Team</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Supervisors Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Guidance</span>
+            <h2 class="section-title">Project Supervisors</h2>
+            <p class="section-subtitle">
+                Faculty members who provided guidance and mentorship throughout the project
+            </p>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            {% if supervisors %}
+                {% for supervisor in supervisors %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+                    <div class="supervisor-detail-card">
+                        <div class="supervisor-photo">
+                            {% if supervisor.photo %}
+                                <img src="{{ supervisor.photo.url }}" alt="{{ supervisor.name }}">
+                            {% else %}
+                                <div class="supervisor-avatar">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="supervisor-info">
+                            <h4>{{ supervisor.title }} {{ supervisor.name }}</h4>
+                            <p class="supervisor-role">{{ supervisor.role }}</p>
+                            {% if supervisor.email %}
+                                <p class="supervisor-email">
+                                    <i class="fas fa-envelope me-2"></i>{{ supervisor.email }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Default supervisors -->
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="supervisor-detail-card">
+                        <div class="supervisor-photo">
+                            <div class="supervisor-avatar"><i class="fas fa-user-tie"></i></div>
+                        </div>
+                        <div class="supervisor-info">
+                            <h4>Assoc. Prof. Dr. Jyoti Tandukar</h4>
+                            <p class="supervisor-role">Project Supervisor</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="supervisor-detail-card">
+                        <div class="supervisor-photo">
+                            <div class="supervisor-avatar"><i class="fas fa-user-tie"></i></div>
+                        </div>
+                        <div class="supervisor-info">
+                            <h4>Asst. Prof. Bibha Sthapit</h4>
+                            <p class="supervisor-role">Project Management Team</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="supervisor-detail-card">
+                        <div class="supervisor-photo">
+                            <div class="supervisor-avatar"><i class="fas fa-user-tie"></i></div>
+                        </div>
+                        <div class="supervisor-info">
+                            <h4>Asst. Prof. Bikal Adhikari</h4>
+                            <p class="supervisor-role">Project Management Team</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Team Members Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Developers</span>
+            <h2 class="section-title">Development Team</h2>
+            <p class="section-subtitle">
+                The students who designed, developed, and implemented the SI3DR system
+            </p>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            {% if team_members %}
+                {% for member in team_members %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+                    <div class="team-detail-card">
+                        <div class="team-photo">
+                            {% if member.photo %}
+                                <img src="{{ member.photo.url }}" alt="{{ member.name }}">
+                            {% else %}
+                                <div class="team-avatar-large">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="team-details">
+                            <h4>{{ member.name }}</h4>
+                            <p class="team-roll-number">{{ member.roll_number }}</p>
+                            <p class="team-role-badge">{{ member.role }}</p>
+                            
+                            <div class="team-social-links">
+                                {% if member.github_url %}
+                                    <a href="{{ member.github_url }}" target="_blank" class="social-link github">
+                                        <i class="fab fa-github"></i>
+                                    </a>
+                                {% endif %}
+                                {% if member.linkedin_url %}
+                                    <a href="{{ member.linkedin_url }}" target="_blank" class="social-link linkedin">
+                                        <i class="fab fa-linkedin"></i>
+                                    </a>
+                                {% endif %}
+                                {% if member.email %}
+                                    <a href="mailto:{{ member.email }}" class="social-link email">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Default team members -->
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="team-detail-card">
+                        <div class="team-photo">
+                            <div class="team-avatar-large"><i class="fas fa-user"></i></div>
+                        </div>
+                        <div class="team-details">
+                            <h4>Anish Bishwakarma</h4>
+                            <p class="team-roll-number">PUL078BCT011</p>
+                            <p class="team-role-badge">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="team-detail-card">
+                        <div class="team-photo">
+                            <div class="team-avatar-large"><i class="fas fa-user"></i></div>
+                        </div>
+                        <div class="team-details">
+                            <h4>Ankit Belbase</h4>
+                            <p class="team-roll-number">PUL078BCT013</p>
+                            <p class="team-role-badge">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="team-detail-card">
+                        <div class="team-photo">
+                            <div class="team-avatar-large"><i class="fas fa-user"></i></div>
+                        </div>
+                        <div class="team-details">
+                            <h4>Dipan Bartaula</h4>
+                            <p class="team-roll-number">PUL078BCT040</p>
+                            <p class="team-role-badge">Developer</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Institution Section -->
+<section class="section-padding bg-dark text-white">
+    <div class="container">
+        <div class="text-center" data-aos="fade-up">
+            <h2 class="section-title text-white mb-4">Tribhuvan University</h2>
+            <h4 class="text-muted mb-3">Institute of Engineering, Pulchowk Campus</h4>
+            <p class="text-muted mb-2">Department of Electronics and Computer Engineering</p>
+            <p class="text-muted">Lalitpur, Nepal</p>
+            
+            <div class="institution-badge mt-4">
+                <span class="badge bg-primary px-4 py-2">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    Final Year Project - December 2025
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Acknowledgments Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                <div class="acknowledgment-card">
+                    <h3 class="mb-4"><i class="fas fa-heart text-danger me-2"></i>Acknowledgments</h3>
+                    <p>
+                        We extend our deepest gratitude to the <strong>Department of Electronics and Computer 
+                        Engineering, Pulchowk Campus, Tribhuvan University</strong> for providing us with the 
+                        resources, guidance, and encouragement to embark on this project.
+                    </p>
+                    <p>
+                        Our sincere thanks go to the <strong>Project Management Team</strong>, including 
+                        Asst. Prof. Bibha Sthapit and Asst. Prof. Bikal Adhikari, for their valuable 
+                        feedback and constant encouragement.
+                    </p>
+                    <p>
+                        We would also like to express our extreme gratitude to our <strong>Project Supervisor 
+                        Assoc. Prof. Dr. Jyoti Tandukar</strong> for constantly guiding us and providing us with 
+                        valuable feedback at each step of our project duration.
+                    </p>
+                    <p>
+                        We wish to acknowledge the support of our peers and seniors, whose suggestions and 
+                        shared experiences have provided clarity and inspiration during the development of 
+                        this project. Furthermore, we extend our heartfelt appreciation to our families and 
+                        friends for their unwavering support, patience, and belief in us throughout this endeavor.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
