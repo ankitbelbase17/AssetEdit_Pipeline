@@ -17,7 +17,7 @@ FRONTEND_PUBLIC_URL = "https://designation-freely-mug-picked.trycloudflare.com"
 # ==============================================================================
 # AWS S3 STORAGE CONFIGURATION
 # ==============================================================================
-AWS_ACCESS_KEY_ID = "AKIAVRQSYHUDULH3FFHK"
-AWS_SECRET_ACCESS_KEY = "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"
-AWS_REGION_NAME = "ap-south-1"
+AWS_ACCESS_KEY_ID = ""
+AWS_SECRET_ACCESS_KEY = ""
+AWS_REGION_NAME = ""
 AWS_S3_BUCKET_NAME = "si3dr-3d-assets-bucket"  # Must match backend config
