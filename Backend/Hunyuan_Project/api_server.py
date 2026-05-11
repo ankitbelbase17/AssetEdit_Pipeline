@@ -144,10 +144,14 @@ def run_job_and_webhook(cmd, session_id, webhook_url, expected_paths, job_type="
         req.add_header('X-Session-Id', session_id)
         req.add_header('X-Job-Type', job_type)
         
-        with urllib.request.urlopen(req, timeout=30) as response:
-            res_data = response.read().decode('utf-8')
-            print(f"[{session_id}] WEBHOOK DELIVERED: {res_data}")
-            JOB_PROGRESS[session_id] = {"progress": 100, "message": "Complete!"}
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                res_data = response.read().decode('utf-8')
+                print(f"[{session_id}] WEBHOOK DELIVERED: {res_data}")
+                JOB_PROGRESS[session_id] = {"progress": 100, "message": "Complete!"}
+        except urllib.error.URLError as e:
+            print(f"[{session_id}] WEBHOOK DELIVERY FAILED: {e}")
+            JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Saved to S3, but Frontend Webhook failed: {e}"}
             
     except Exception as e:
         import traceback
@@ -409,7 +413,7 @@ def generate_heatmap():
                             JOB_PROGRESS[session_id] = {"progress": 100, "message": "Complete!"}
                     except Exception as e:
                         print(f"[{session_id}] Failed webhook: {e}")
-                        JOB_PROGRESS[session_id] = {"progress": 0, "message": f"Webhook delivery failed: {str(e)[:80]}"}
+                        JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Saved to S3, but Frontend Webhook failed: {str(e)[:80]}"}
                 else:
                     print(f"[{session_id}] Heatmap compiler failed.")
                     JOB_PROGRESS[session_id] = {"progress": 0, "message": "Heatmap compilation failed."}
