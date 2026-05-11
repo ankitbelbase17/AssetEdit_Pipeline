@@ -823,6 +823,126 @@
             display: none;
         }
     }
+
+    /* --- Image Edit Panel --- */
+    .edit-panel {
+        display: none;
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(102,126,234,0.15);
+        border-radius: 16px;
+        animation: panelFadeIn 0.4s ease;
+    }
+    .edit-panel.active { display: block; }
+
+    .edit-panel-header {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 1rem;
+    }
+    .edit-panel-header .edit-icon {
+        width: 38px; height: 38px; border-radius: 10px;
+        background: linear-gradient(135deg, #f6ad55, #ed8936);
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 0.95rem;
+    }
+    .edit-panel-header h5 { color: #fff; margin: 0; font-size: 1rem; }
+    .edit-panel-header p { color: #718096; font-size: 0.8rem; margin: 0; }
+
+    .edit-prompt-row {
+        display: flex; gap: 0.75rem; align-items: stretch;
+    }
+    .edit-prompt-input {
+        flex: 1; padding: 0.75rem 1rem;
+        background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px; color: #e2e8f0; font-size: 0.9rem;
+        outline: none; transition: border-color 0.3s;
+    }
+    .edit-prompt-input::placeholder { color: #4a5568; }
+    .edit-prompt-input:focus { border-color: #f6ad55; }
+
+    .edit-apply-btn {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #f6ad55, #ed8936);
+        border: none; border-radius: 12px; color: #fff;
+        font-weight: 700; font-size: 0.85rem; cursor: pointer;
+        transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+        white-space: nowrap;
+    }
+    .edit-apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(237,137,54,0.4);
+    }
+    .edit-apply-btn:disabled {
+        opacity: 0.6; cursor: not-allowed; transform: none;
+        box-shadow: none;
+    }
+
+    .edit-toggle-btn {
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #f6ad55, #ed8936);
+        border: none; border-radius: 10px; color: #fff;
+        font-weight: 600; font-size: 0.8rem; cursor: pointer;
+        transition: all 0.3s; display: inline-flex;
+        align-items: center; gap: 6px;
+    }
+    .edit-toggle-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(237,137,54,0.35);
+    }
+
+    .edit-comparison {
+        display: none; margin-top: 1rem;
+        grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .edit-comparison.active { display: grid; }
+    .edit-comparison .comp-card {
+        border-radius: 12px; overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(0,0,0,0.2);
+    }
+    .edit-comparison .comp-card img {
+        width: 100%; height: 200px; object-fit: contain; padding: 8px;
+    }
+    .edit-comparison .comp-label {
+        padding: 0.5rem 0.75rem; text-align: center;
+        font-size: 0.75rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .comp-label.original { color: #a0aec0; background: rgba(255,255,255,0.03); }
+    .comp-label.edited { color: #f6ad55; background: rgba(246,173,85,0.08); }
+
+    .edit-actions-row {
+        display: flex; gap: 0.75rem; margin-top: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .edit-use-btn {
+        padding: 0.55rem 1.25rem;
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        border: none; border-radius: 10px; color: #fff;
+        font-weight: 600; font-size: 0.8rem; cursor: pointer;
+        transition: all 0.3s; display: none;
+        align-items: center; gap: 6px;
+    }
+    .edit-use-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(72,187,120,0.35);
+    }
+    .edit-discard-btn {
+        padding: 0.55rem 1.25rem;
+        background: rgba(245,101,101,0.1);
+        border: 1px solid rgba(245,101,101,0.25);
+        border-radius: 10px; color: #f56565;
+        font-weight: 600; font-size: 0.8rem; cursor: pointer;
+        transition: all 0.3s; display: none;
+        align-items: center; gap: 6px;
+    }
+    .edit-discard-btn:hover { background: rgba(245,101,101,0.2); }
+
+    @media (max-width: 768px) {
+        .edit-prompt-row { flex-direction: column; }
+        .edit-comparison { grid-template-columns: 1fr; }
+    }
 </style>
 {% endblock %}
 
@@ -847,13 +967,18 @@
                 <p>Pick from gallery, upload, or capture</p>
             </div>
             <div class="how-step">
+                <div class="step-circle"><i class="fas fa-magic"></i></div>
+                <h6>2. Edit (Optional)</h6>
+                <p>AI-powered image editing via Qwen</p>
+            </div>
+            <div class="how-step">
                 <div class="step-circle"><i class="fas fa-cogs"></i></div>
-                <h6>2. Process</h6>
+                <h6>3. Process</h6>
                 <p>AI generates multi-view &amp; depth</p>
             </div>
             <div class="how-step">
                 <div class="step-circle"><i class="fas fa-cube"></i></div>
-                <h6>3. View 3D</h6>
+                <h6>4. View 3D</h6>
                 <p>Interact with your 3D model</p>
             </div>
         </div>
@@ -1001,6 +1126,9 @@
                         <p id="previewDesc">Your image is ready. Click the button below to generate its
                             3D reconstruction using our Hunyuan3D pipeline on Lightning AI.</p>
                         <div class="viewer-actions">
+                            <button class="edit-toggle-btn" id="editToggleBtn" onclick="toggleEditPanel()">
+                                <i class="fas fa-magic"></i> Edit Image First
+                            </button>
                             <button class="generate-btn" id="generateBtn" onclick="handleGenerate(event)">
                                 <i class="fas fa-cube"></i> <span>Generate 3D Model</span>
                             </button>
@@ -1026,6 +1154,42 @@
                                 style="display: none; margin-top: 5px; color: #4b5563; font-weight: bold;">0%</small>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- AI Image Edit Panel -->
+            <div class="edit-panel" id="editPanel">
+                <div class="edit-panel-header">
+                    <div class="edit-icon"><i class="fas fa-magic"></i></div>
+                    <div>
+                        <h5>AI Image Editor — Qwen Image Edit</h5>
+                        <p>Describe what changes you want to make to the image before 3D generation</p>
+                    </div>
+                </div>
+                <div class="edit-prompt-row">
+                    <input type="text" class="edit-prompt-input" id="editPrompt"
+                        placeholder="e.g. Make the background a sunset scene, add golden lighting...">
+                    <button class="edit-apply-btn" id="editApplyBtn" onclick="handleEditImage()">
+                        <i class="fas fa-wand-magic-sparkles"></i> Apply Edit
+                    </button>
+                </div>
+                <div class="edit-comparison" id="editComparison">
+                    <div class="comp-card">
+                        <img id="editOriginalImg" src="" alt="Original">
+                        <div class="comp-label original">Original</div>
+                    </div>
+                    <div class="comp-card">
+                        <img id="editResultImg" src="" alt="Edited">
+                        <div class="comp-label edited">AI Edited</div>
+                    </div>
+                </div>
+                <div class="edit-actions-row">
+                    <button class="edit-use-btn" id="editUseBtn" onclick="useEditedImage()">
+                        <i class="fas fa-check"></i> Use Edited Image
+                    </button>
+                    <button class="edit-discard-btn" id="editDiscardBtn" onclick="discardEditedImage()">
+                        <i class="fas fa-undo"></i> Discard &amp; Keep Original
+                    </button>
                 </div>
             </div>
         </div>
@@ -1067,6 +1231,7 @@
     let selectedGalleryCard = null;
     let currentSessionId = null;
     let currentImageSrc = null; // Store the original image data URL for generation
+    let editedImageData = null; // Stores the edited image data URL from Qwen
 
     // ===== GALLERY SELECTION =====
     function selectGalleryCard(card) {
@@ -1285,6 +1450,15 @@
         generateBtn.style.display = 'inline-flex';
         currentSessionId = null;
         currentImageSrc = null;
+        editedImageData = null;
+
+        // Reset edit panel
+        document.getElementById('editPanel').classList.remove('active');
+        document.getElementById('editComparison').classList.remove('active');
+        document.getElementById('editUseBtn').style.display = 'none';
+        document.getElementById('editDiscardBtn').style.display = 'none';
+        document.getElementById('editPrompt').value = '';
+        document.getElementById('editToggleBtn').style.display = 'inline-flex';
 
         // Deselect gallery card
         if (selectedGalleryCard) {
@@ -1542,6 +1716,120 @@
             btn.style.pointerEvents = '';
         }
     }
+
+    // ===== IMAGE EDITING (QWEN) =====
+    function toggleEditPanel() {
+        const panel = document.getElementById('editPanel');
+        panel.classList.toggle('active');
+        if (panel.classList.contains('active')) {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    async function handleEditImage() {
+        const prompt = document.getElementById('editPrompt').value.trim();
+        if (!prompt) {
+            alert('Please enter an edit prompt describing what changes you want.');
+            return;
+        }
+        if (!currentImageSrc) {
+            alert('No image selected to edit.');
+            return;
+        }
+
+        const btn = document.getElementById('editApplyBtn');
+        const statusBar = document.querySelector('.status-bar span');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Editing...';
+        statusBar.textContent = 'Sending image to Qwen AI editor...';
+        document.querySelector('.status-bar .status-dot').style.background = '#f6ad55';
+
+        // Get the image as base64
+        let imgDataUrl = currentImageSrc;
+        if (!imgDataUrl.startsWith('data:image')) {
+            const tempImg = new Image();
+            tempImg.crossOrigin = 'anonymous';
+            imgDataUrl = await new Promise((resolve, reject) => {
+                tempImg.onload = function() {
+                    const c = document.createElement('canvas');
+                    c.width = tempImg.naturalWidth;
+                    c.height = tempImg.naturalHeight;
+                    c.getContext('2d').drawImage(tempImg, 0, 0);
+                    resolve(c.toDataURL('image/jpeg', 0.9));
+                };
+                tempImg.onerror = reject;
+                tempImg.src = currentImageSrc;
+            });
+        }
+
+        try {
+            const response = await fetch('{% url "project_showcase:edit_image" %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imgDataUrl, prompt: prompt })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                editedImageData = data.edited_image;
+
+                // Show before/after comparison
+                document.getElementById('editOriginalImg').src = imgDataUrl;
+                document.getElementById('editResultImg').src = editedImageData;
+                document.getElementById('editComparison').classList.add('active');
+                document.getElementById('editUseBtn').style.display = 'inline-flex';
+                document.getElementById('editDiscardBtn').style.display = 'inline-flex';
+
+                statusBar.textContent = 'Edit complete! Choose to use or discard the result.';
+                document.querySelector('.status-bar .status-dot').style.background = '#48bb78';
+            } else {
+                throw new Error(data.error || 'Image editing failed');
+            }
+        } catch (error) {
+            console.error('Edit Error:', error);
+            statusBar.textContent = 'Edit failed: ' + error.message;
+            document.querySelector('.status-bar .status-dot').style.background = '#ef4444';
+            alert('Image editing failed: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Apply Edit';
+        }
+    }
+
+    function useEditedImage() {
+        if (!editedImageData) return;
+
+        // Replace the preview image and current source with the edited version
+        currentImageSrc = editedImageData;
+        const img = document.getElementById('previewImg');
+        img.src = editedImageData;
+        img.style.display = 'block';
+        document.getElementById('resultViewer').style.display = 'none';
+
+        // Collapse edit panel
+        document.getElementById('editPanel').classList.remove('active');
+        document.querySelector('.status-bar span').textContent = 'Edited image applied. Ready to generate 3D model.';
+        document.querySelector('.status-bar .status-dot').style.background = '#48bb78';
+
+        // Update badge
+        const badge = document.getElementById('sourceBadge');
+        badge.className = 'source-badge badge-upload';
+        badge.querySelector('i').className = 'fas fa-magic';
+        document.getElementById('sourceText').textContent = 'AI Edited';
+    }
+
+    function discardEditedImage() {
+        editedImageData = null;
+        document.getElementById('editComparison').classList.remove('active');
+        document.getElementById('editUseBtn').style.display = 'none';
+        document.getElementById('editDiscardBtn').style.display = 'none';
+        document.querySelector('.status-bar span').textContent = 'Edit discarded. Original image retained.';
+    }
+
+    // Submit edit on Enter key
+    document.getElementById('editPrompt').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') handleEditImage();
+    });
 
     // ===== VIEWER FULLSCREEN =====
     function toggleFullscreen() {

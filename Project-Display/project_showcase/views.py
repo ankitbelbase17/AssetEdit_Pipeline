@@ -304,6 +304,60 @@ def generate_3d(request):
 
 @csrf_exempt
 @require_POST
+def edit_image(request):
+    """
+    Proxies an image editing request to the remote backend's Qwen Image Edit pipeline.
+    Receives base64 image + text prompt, returns the edited image as base64.
+    """
+    try:
+        data = json.loads(request.body)
+        image_data = data.get('image')
+        prompt = data.get('prompt', '')
+        seed = data.get('seed', 0)
+
+        if not image_data:
+            return JsonResponse({'success': False, 'error': 'No image data provided'}, status=400)
+        if not prompt.strip():
+            return JsonResponse({'success': False, 'error': 'No edit prompt provided'}, status=400)
+
+        print(f"\n[ImageEdit] 🎨 Dispatching image edit to Remote Backend. Prompt: '{prompt[:60]}...'")
+
+        payload = {
+            'image': image_data,
+            'prompt': prompt,
+            'seed': seed,
+        }
+
+        backend_endpoint = f"{HUNYUAN_BACKEND_URL.rstrip('/')}/api/edit-image"
+
+        try:
+            req = urllib.request.Request(
+                backend_endpoint,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+            # Image editing can take a while (up to ~2 minutes for 40 inference steps)
+            with urllib.request.urlopen(req, timeout=300) as response:
+                result = json.loads(response.read().decode('utf-8'))
+
+                if result.get('success'):
+                    return JsonResponse({
+                        'success': True,
+                        'edited_image': result['edited_image'],
+                        'message': result.get('message', 'Image edited successfully')
+                    })
+                else:
+                    return JsonResponse({'success': False, 'error': result.get('error', 'Backend edit failed')}, status=500)
+
+        except urllib.error.URLError as e:
+            return JsonResponse({'success': False, 'error': f'Failed to reach backend edit API: {str(e)}'}, status=500)
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_POST
 def generate_heatmap(request):
     """
     Sends an async webhook heatmap request to the remote backend.
