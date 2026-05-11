@@ -13,6 +13,7 @@ from flask_cors import CORS
 from PIL import Image
 import config
 import boto3
+from botocore.exceptions import ClientError
 
 app = Flask(__name__)
 # Enable Cross-Origin requests so the frontend Django platform can communicate with it
@@ -43,24 +44,63 @@ def get_qwen_pipeline():
 
 # ─── S3 HELPER ──────────────────────────────────────────────────────────────
 _s3_bucket_verified = False
+_s3_region_override = None
 
-def get_s3_client():
-    """Returns a boto3 S3 client and ensures the bucket exists (auto-creates if needed)."""
-    global _s3_bucket_verified
-    client = boto3.client(
+def _build_s3_client(region_name):
+    return boto3.client(
         's3',
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
-        region_name=config.AWS_REGION_NAME
+        region_name=region_name
     )
+
+def _log_s3_error(prefix, err):
+    err_info = err.response.get('Error', {})
+    err_code = err_info.get('Code', 'Unknown')
+    err_message = err_info.get('Message', 'Unknown')
+    metadata = err.response.get('ResponseMetadata', {})
+    status_code = metadata.get('HTTPStatusCode')
+    request_id = metadata.get('RequestId')
+    host_id = metadata.get('HostId')
+    headers = metadata.get('HTTPHeaders', {}) or {}
+    bucket_region = headers.get('x-amz-bucket-region')
+
+    print(f"[S3] {prefix}: code={err_code} status={status_code} message={err_message}")
+    if bucket_region:
+        print(f"[S3] Bucket region from response: {bucket_region}")
+    if request_id:
+        print(f"[S3] RequestId: {request_id}")
+    if host_id:
+        print(f"[S3] HostId: {host_id}")
+
+def get_s3_client():
+    """Returns a boto3 S3 client and ensures the bucket exists (auto-creates if needed)."""
+    global _s3_bucket_verified, _s3_region_override
+    region_name = _s3_region_override or config.AWS_REGION_NAME
+    client = _build_s3_client(region_name)
     
     if not _s3_bucket_verified:
         try:
             client.head_bucket(Bucket=config.AWS_S3_BUCKET_NAME)
             print(f"[S3] Bucket '{config.AWS_S3_BUCKET_NAME}' exists and accessible.")
-        except client.exceptions.ClientError as e:
-            error_code = int(e.response['Error']['Code'])
-            if error_code == 404:
+        except ClientError as e:
+            err_code = str(e.response.get('Error', {}).get('Code', ''))
+            headers = e.response.get('ResponseMetadata', {}).get('HTTPHeaders', {}) or {}
+            bucket_region = headers.get('x-amz-bucket-region')
+
+            if bucket_region and bucket_region != region_name:
+                print(
+                    f"[S3] Bucket region mismatch. Requested '{region_name}', bucket in '{bucket_region}'. Retrying..."
+                )
+                _s3_region_override = bucket_region
+                client = _build_s3_client(bucket_region)
+                try:
+                    client.head_bucket(Bucket=config.AWS_S3_BUCKET_NAME)
+                    print(f"[S3] Bucket '{config.AWS_S3_BUCKET_NAME}' exists and accessible.")
+                except ClientError as retry_err:
+                    _log_s3_error("Bucket access error after region retry", retry_err)
+                    raise
+            elif err_code in ('404', 'NoSuchBucket', 'NotFound'):
                 print(f"[S3] Bucket '{config.AWS_S3_BUCKET_NAME}' not found. Creating...")
                 try:
                     if config.AWS_REGION_NAME == 'us-east-1':
@@ -75,7 +115,7 @@ def get_s3_client():
                     print(f"[S3] Failed to create bucket: {create_err}")
                     raise
             else:
-                print(f"[S3] Bucket access error (code {error_code}): {e}")
+                _log_s3_error("Bucket access error", e)
                 raise
         _s3_bucket_verified = True
     
