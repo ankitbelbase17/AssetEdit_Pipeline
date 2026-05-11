@@ -230,10 +230,10 @@ def run_job_and_webhook(cmd, session_id, webhook_url, expected_paths, job_type="
                 JOB_PROGRESS[session_id] = {"progress": 100, "message": "Complete!"}
         except urllib.error.URLError as e:
             print(f"[{session_id}] WEBHOOK DELIVERY FAILED: {e}")
-                if use_s3:
-                    JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Saved to S3, but Frontend Webhook failed: {e}"}
-                else:
-                    JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Asset ready, but Frontend Webhook failed: {e}"}
+            if use_s3:
+                JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Saved to S3, but Frontend Webhook failed: {e}"}
+            else:
+                JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Asset ready, but Frontend Webhook failed: {e}"}
             
     except Exception as e:
         import traceback
