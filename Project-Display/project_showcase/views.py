@@ -450,7 +450,7 @@ def receive_webhook(request):
     back to this Django frontend.
     """
     try:
-        from .config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_NAME, AWS_S3_BUCKET_NAME
+        from .config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_NAME, AWS_S3_BUCKET_NAME, HUNYUAN_BACKEND_URL
         import boto3
         
         if request.content_type == 'application/json':
@@ -461,11 +461,16 @@ def receive_webhook(request):
         session_id = request.headers.get('X-Session-Id') or data.get('session_id')
         job_type = request.headers.get('X-Job-Type') or data.get('job_type')
         s3_key = data.get('s3_key')
+        asset_url = data.get('asset_url')
+        asset_path = data.get('asset_path')
         
-        if not all([session_id, job_type, s3_key]):
-            return JsonResponse({'success': False, 'error': 'Missing parameters (s3_key, session_id, or job_type)'}, status=400)
+        if not all([session_id, job_type]) or not (s3_key or asset_url or asset_path):
+            return JsonResponse({'success': False, 'error': 'Missing parameters (s3_key/asset_path/asset_url, session_id, or job_type)'}, status=400)
             
-        print(f"\n[{session_id}] ⚡ INCOMING WEBHOOK! Remote backend replied mapping AWS S3 Pointer: {s3_key}")
+        if s3_key:
+            print(f"\n[{session_id}] ⚡ INCOMING WEBHOOK! Remote backend replied mapping AWS S3 Pointer: {s3_key}")
+        else:
+            print(f"\n[{session_id}] ⚡ INCOMING WEBHOOK! Remote backend replied with direct asset path.")
         
         output_dir = os.path.join(settings.BASE_DIR, 'media', 'Outputs')
         os.makedirs(output_dir, exist_ok=True)
@@ -473,42 +478,52 @@ def receive_webhook(request):
         filename = f"asset_3d_{session_id}.glb" if job_type == '3d' else f"asset_heatmap_{session_id}.glb"
         filepath = os.path.join(output_dir, filename)
         
-        print(f"[{session_id}] 📥 Downloading massive binary natively from AWS '{AWS_S3_BUCKET_NAME}'...")
-        
-        s3_client = boto3.client(
-            's3',
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-            region_name=AWS_REGION_NAME
-        )
-        s3_client.download_file(AWS_S3_BUCKET_NAME, s3_key, filepath)
+        if asset_url or asset_path:
+            import urllib.request
+            import shutil
+            if not asset_url:
+                asset_url = f"{HUNYUAN_BACKEND_URL.rstrip('/')}/outputs/{asset_path.lstrip('/')}"
+            print(f"[{session_id}] 📥 Downloading direct asset from backend: {asset_url}")
+            with urllib.request.urlopen(asset_url, timeout=60) as response, open(filepath, 'wb') as f:
+                shutil.copyfileobj(response, f)
+        else:
+            print(f"[{session_id}] 📥 Downloading massive binary natively from AWS '{AWS_S3_BUCKET_NAME}'...")
+            
+            s3_client = boto3.client(
+                's3',
+                aws_access_key_id=AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+                region_name=AWS_REGION_NAME
+            )
+            s3_client.download_file(AWS_S3_BUCKET_NAME, s3_key, filepath)
             
         print(f"[{session_id}] ✅ FULLY SAVED TO SITE REPOSITORY DYNAMICALLY: {filepath}")
         
-        # Download per-iteration GLBs and heatmaps if provided
+        # Download per-iteration GLBs and heatmaps if provided (S3 path only)
         iterations = data.get('iterations', [])
-        for it in iterations:
-            iter_num = it.get('number')
-            glb_key = it.get('glb_key')
-            hm_key = it.get('heatmap_key')
-            
-            if glb_key and iter_num is not None:
-                iter_filename = f"asset_iter_{session_id}_{iter_num}.glb"
-                iter_filepath = os.path.join(output_dir, iter_filename)
-                try:
-                    s3_client.download_file(AWS_S3_BUCKET_NAME, glb_key, iter_filepath)
-                    print(f"[{session_id}]   ✅ Saved iteration {iter_num} GLB: {iter_filename}")
-                except Exception as e:
-                    print(f"[{session_id}]   ⚠ Failed downloading iteration {iter_num} GLB: {e}")
-            
-            if hm_key and iter_num is not None:
-                hm_filename = f"asset_itermap_{session_id}_{iter_num}.glb"
-                hm_filepath = os.path.join(output_dir, hm_filename)
-                try:
-                    s3_client.download_file(AWS_S3_BUCKET_NAME, hm_key, hm_filepath)
-                    print(f"[{session_id}]   ✅ Saved iteration {iter_num} heatmap: {hm_filename}")
-                except Exception as e:
-                    print(f"[{session_id}]   ⚠ Failed downloading iteration {iter_num} heatmap: {e}")
+        if not (asset_url or asset_path):
+            for it in iterations:
+                iter_num = it.get('number')
+                glb_key = it.get('glb_key')
+                hm_key = it.get('heatmap_key')
+                
+                if glb_key and iter_num is not None:
+                    iter_filename = f"asset_iter_{session_id}_{iter_num}.glb"
+                    iter_filepath = os.path.join(output_dir, iter_filename)
+                    try:
+                        s3_client.download_file(AWS_S3_BUCKET_NAME, glb_key, iter_filepath)
+                        print(f"[{session_id}]   ✅ Saved iteration {iter_num} GLB: {iter_filename}")
+                    except Exception as e:
+                        print(f"[{session_id}]   ⚠ Failed downloading iteration {iter_num} GLB: {e}")
+                
+                if hm_key and iter_num is not None:
+                    hm_filename = f"asset_itermap_{session_id}_{iter_num}.glb"
+                    hm_filepath = os.path.join(output_dir, hm_filename)
+                    try:
+                        s3_client.download_file(AWS_S3_BUCKET_NAME, hm_key, hm_filepath)
+                        print(f"[{session_id}]   ✅ Saved iteration {iter_num} heatmap: {hm_filename}")
+                    except Exception as e:
+                        print(f"[{session_id}]   ⚠ Failed downloading iteration {iter_num} heatmap: {e}")
         
         iter_count = len(iterations)
         print(f"[{session_id}] ✅ Total: main file + {iter_count} iterations downloaded\n")

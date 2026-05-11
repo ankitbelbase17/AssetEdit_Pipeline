@@ -178,30 +178,46 @@ def run_job_and_webhook(cmd, session_id, webhook_url, expected_paths, job_type="
             JOB_PROGRESS[session_id] = {"progress": 0, "message": "Missing Output Asset Error."}
             return
             
-        print(f"[{session_id}] SUCCESS: Generation complete. Transmitting to AWS S3...")
-        JOB_PROGRESS[session_id] = {"progress": 95, "message": "Uploading 3D Asset to Cloud Storage..."}
-        
-        s3_client = get_s3_client()
-        
-        # Uniquely identify the mesh
-        s3_key = f"3d_asset_{session_id}.glb"
-        
-        print(f"[{session_id}] Pushing directly to AWS bucket '{config.AWS_S3_BUCKET_NAME}' as '{s3_key}'...")
-        s3_client.upload_file(
-            final_glb_path,
-            config.AWS_S3_BUCKET_NAME,
-            s3_key,
-            ExtraArgs={'ContentType': 'model/gltf-binary'}
-        )
+        use_s3 = not getattr(config, "BYPASS_S3_UPLOAD", False)
+        if use_s3:
+            print(f"[{session_id}] SUCCESS: Generation complete. Transmitting to AWS S3...")
+            JOB_PROGRESS[session_id] = {"progress": 95, "message": "Uploading 3D Asset to Cloud Storage..."}
+            
+            s3_client = get_s3_client()
+            
+            # Uniquely identify the mesh
+            s3_key = f"3d_asset_{session_id}.glb"
+            
+            print(f"[{session_id}] Pushing directly to AWS bucket '{config.AWS_S3_BUCKET_NAME}' as '{s3_key}'...")
+            s3_client.upload_file(
+                final_glb_path,
+                config.AWS_S3_BUCKET_NAME,
+                s3_key,
+                ExtraArgs={'ContentType': 'model/gltf-binary'}
+            )
+            
+            payload = {
+                "s3_key": s3_key,
+                "job_type": job_type,
+                "session_id": session_id
+            }
+            
+            print(f"[{session_id}] S3 Upload Successful. Triggering Frontend Django Webhook Ping...")
+        else:
+            print(f"[{session_id}] SUCCESS: Generation complete. Bypassing S3 upload.")
+            JOB_PROGRESS[session_id] = {"progress": 95, "message": "Finalizing 3D Asset..."}
+            
+            rel_path = os.path.relpath(final_glb_path, config.OUTPUT_DIR).replace(os.sep, '/')
+            payload = {
+                "asset_path": rel_path,
+                "job_type": job_type,
+                "session_id": session_id
+            }
+            
+            print(f"[{session_id}] Sending asset path to frontend webhook: {rel_path}")
         
         import urllib.request
-        payload = json.dumps({
-            "s3_key": s3_key,
-            "job_type": job_type,
-            "session_id": session_id
-        }).encode('utf-8')
-        
-        print(f"[{session_id}] S3 Upload Successful. Triggering Frontend Django Webhook Ping...")
+        payload = json.dumps(payload).encode('utf-8')
         req = urllib.request.Request(webhook_url, data=payload)
         req.add_header('Content-Type', 'application/json')
         req.add_header('X-Session-Id', session_id)
@@ -214,7 +230,10 @@ def run_job_and_webhook(cmd, session_id, webhook_url, expected_paths, job_type="
                 JOB_PROGRESS[session_id] = {"progress": 100, "message": "Complete!"}
         except urllib.error.URLError as e:
             print(f"[{session_id}] WEBHOOK DELIVERY FAILED: {e}")
-            JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Saved to S3, but Frontend Webhook failed: {e}"}
+                if use_s3:
+                    JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Saved to S3, but Frontend Webhook failed: {e}"}
+                else:
+                    JOB_PROGRESS[session_id] = {"progress": 100, "message": f"Asset ready, but Frontend Webhook failed: {e}"}
             
     except Exception as e:
         import traceback
