@@ -390,9 +390,37 @@ def receive_webhook(request):
         )
         s3_client.download_file(AWS_S3_BUCKET_NAME, s3_key, filepath)
             
-        print(f"[{session_id}] ✅ FULLY SAVED TO SITE REPOSITORY DYNAMICALLY: {filepath}\n")
+        print(f"[{session_id}] ✅ FULLY SAVED TO SITE REPOSITORY DYNAMICALLY: {filepath}")
+        
+        # Download per-iteration GLBs and heatmaps if provided
+        iterations = data.get('iterations', [])
+        for it in iterations:
+            iter_num = it.get('number')
+            glb_key = it.get('glb_key')
+            hm_key = it.get('heatmap_key')
             
-        return JsonResponse({"success": True, "message": f"Saved {filename} to local static directory securely from s3 cache"})
+            if glb_key and iter_num is not None:
+                iter_filename = f"asset_iter_{session_id}_{iter_num}.glb"
+                iter_filepath = os.path.join(output_dir, iter_filename)
+                try:
+                    s3_client.download_file(AWS_S3_BUCKET_NAME, glb_key, iter_filepath)
+                    print(f"[{session_id}]   ✅ Saved iteration {iter_num} GLB: {iter_filename}")
+                except Exception as e:
+                    print(f"[{session_id}]   ⚠ Failed downloading iteration {iter_num} GLB: {e}")
+            
+            if hm_key and iter_num is not None:
+                hm_filename = f"asset_itermap_{session_id}_{iter_num}.glb"
+                hm_filepath = os.path.join(output_dir, hm_filename)
+                try:
+                    s3_client.download_file(AWS_S3_BUCKET_NAME, hm_key, hm_filepath)
+                    print(f"[{session_id}]   ✅ Saved iteration {iter_num} heatmap: {hm_filename}")
+                except Exception as e:
+                    print(f"[{session_id}]   ⚠ Failed downloading iteration {iter_num} heatmap: {e}")
+        
+        iter_count = len(iterations)
+        print(f"[{session_id}] ✅ Total: main file + {iter_count} iterations downloaded\n")
+            
+        return JsonResponse({"success": True, "message": f"Saved {filename} + {iter_count} iterations to local static directory securely from s3 cache"})
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -451,6 +479,12 @@ def delete_asset_view(request, session_id):
             f"asset_image_{session_id}.jpg",
             f"image_asset_{session_id}.jpg"
         ]
+        
+        # Also find per-iteration files
+        if os.path.isdir(output_dir):
+            for f in os.listdir(output_dir):
+                if f.startswith(f"asset_iter_{session_id}_") or f.startswith(f"asset_itermap_{session_id}_"):
+                    files.append(f)
         
         deleted_count = 0
         for f in files:

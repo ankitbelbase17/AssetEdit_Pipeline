@@ -32,5 +32,4 @@ NUM_OUTPUTS = 1  # For API usage, we usually just want 1 iteration per request
 AWS_ACCESS_KEY_ID = ""
 AWS_SECRET_ACCESS_KEY = ""
 AWS_REGION_NAME = ""
-AWS_S3_BUCKET_NAME = "si3dr-3d-assets-bucket"  # Auto-created if it doesn't exist
-
+AWS_S3_BUCKET_NAME = "si3dr-3d-assets-bucket"

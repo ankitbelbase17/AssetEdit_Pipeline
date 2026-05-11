@@ -238,7 +238,7 @@ def generate_heatmap():
         if not os.path.exists(input_path):
             return jsonify({'success': False, 'error': 'Original image not found for this session.'}), 404
             
-        HEATMAP_FACES = 8
+        HEATMAP_FACES = 3
         
         cmd_generate = [
             "bash", config.RUNNER_SCRIPT,
@@ -278,8 +278,98 @@ def generate_heatmap():
             proc1.wait()
             
             if proc1.returncode == 0:
-                JOB_PROGRESS[session_id] = {"progress": 85, "message": "Compiling Geometric Variance Topologies into GLB Heatmap..."}
-                print(f"[{session_id}] Thread: Compiling geometry...")
+                import glob as glob_mod
+                import urllib.request
+                
+                s3_client = get_s3_client()
+                iteration_data = []
+                
+                # ── Step A: Upload individual iteration GLBs ──
+                JOB_PROGRESS[session_id] = {"progress": 65, "message": "Uploading individual iteration meshes..."}
+                print(f"[{session_id}] Thread: Uploading individual iteration GLBs...")
+                
+                iter_glbs = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", f"{stem}_texture.glb")))
+                if not iter_glbs:
+                    iter_glbs = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", f"{stem}_shape.glb")))
+                
+                for glb_path in iter_glbs:
+                    folder = os.path.basename(os.path.dirname(glb_path))
+                    parts = folder.rsplit('_', 1)
+                    if len(parts) == 2 and parts[1].isdigit():
+                        iter_num = int(parts[1])
+                        iter_s3_key = f"iter_{session_id}_{iter_num}.glb"
+                        try:
+                            s3_client.upload_file(glb_path, config.AWS_S3_BUCKET_NAME, iter_s3_key, ExtraArgs={'ContentType': 'model/gltf-binary'})
+                            iteration_data.append({"number": iter_num, "glb_key": iter_s3_key})
+                            print(f"[{session_id}]   Uploaded iteration {iter_num} GLB → {iter_s3_key}")
+                        except Exception as e:
+                            print(f"[{session_id}]   Failed to upload iteration {iter_num}: {e}")
+                
+                # ── Step B: Compute per-iteration heatmaps ──
+                JOB_PROGRESS[session_id] = {"progress": 75, "message": "Computing per-iteration topology maps..."}
+                print(f"[{session_id}] Thread: Computing per-iteration heatmaps...")
+                
+                try:
+                    import trimesh
+                    import numpy as np
+                    from scipy.spatial import cKDTree
+                    import matplotlib.cm as cm
+                    from matplotlib.colors import Normalize
+                    
+                    obj_paths = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", "textured_mesh.obj")))
+                    if len(obj_paths) < 2:
+                        obj_paths = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", "mesh.obj")))
+                    
+                    iter_meshes = []
+                    for p in obj_paths:
+                        folder_name = os.path.basename(os.path.dirname(p))
+                        p_parts = folder_name.rsplit('_', 1)
+                        if len(p_parts) == 2 and p_parts[1].isdigit():
+                            try:
+                                m = trimesh.load(p, force="mesh", process=True)
+                                if isinstance(m, trimesh.Scene) and m.geometry:
+                                    m = trimesh.util.concatenate(list(m.geometry.values()))
+                                if m and hasattr(m, 'vertices') and len(m.vertices) > 0:
+                                    iter_meshes.append({'number': int(p_parts[1]), 'mesh': m})
+                            except Exception as e:
+                                print(f"[{session_id}]   Failed loading mesh {p}: {e}")
+                    
+                    if len(iter_meshes) >= 2:
+                        ref_mesh = iter_meshes[-1]['mesh']
+                        tree = cKDTree(ref_mesh.vertices)
+                        
+                        for it_m in iter_meshes:
+                            try:
+                                distances, _ = tree.query(it_m['mesh'].vertices)
+                                vmax = np.percentile(distances, 98) if len(distances) > 0 else 0.1
+                                norm = Normalize(vmin=0, vmax=max(vmax, 0.001))
+                                cmap_fn = cm.get_cmap("plasma")
+                                rgba = (cmap_fn(norm(distances)) * 255).astype(np.uint8)
+                                it_m['mesh'].visual = trimesh.visual.ColorVisuals(mesh=it_m['mesh'], vertex_colors=rgba)
+                                
+                                hm_path = os.path.join(config.OUTPUT_DIR, f"itermap_{session_id}_{it_m['number']}.glb")
+                                it_m['mesh'].export(hm_path)
+                                
+                                hm_s3_key = f"itermap_{session_id}_{it_m['number']}.glb"
+                                s3_client.upload_file(hm_path, config.AWS_S3_BUCKET_NAME, hm_s3_key, ExtraArgs={'ContentType': 'model/gltf-binary'})
+                                
+                                for d in iteration_data:
+                                    if d['number'] == it_m['number']:
+                                        d['heatmap_key'] = hm_s3_key
+                                        break
+                                print(f"[{session_id}]   Computed + uploaded heatmap for iteration {it_m['number']}")
+                            except Exception as e:
+                                print(f"[{session_id}]   Failed heatmap for iteration {it_m['number']}: {e}")
+                    else:
+                        print(f"[{session_id}]   Not enough meshes for per-iteration heatmaps ({len(iter_meshes)} found)")
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    print(f"[{session_id}] Per-iteration heatmap computation failed: {e}")
+                
+                # ── Step C: Compute combined heatmap (existing logic) ──
+                JOB_PROGRESS[session_id] = {"progress": 85, "message": "Compiling combined uncertainty heatmap..."}
+                print(f"[{session_id}] Thread: Compiling combined heatmap...")
                 
                 proc2 = subprocess.Popen(cmd_heatmap, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                 for line in proc2.stdout:
@@ -288,11 +378,10 @@ def generate_heatmap():
                 proc2.wait()
                 
                 if os.path.exists(final_heatmap_path):
-                    JOB_PROGRESS[session_id] = {"progress": 95, "message": "Pushing Heatmap Model to Cloud Storage..."}
-                    s3_client = get_s3_client()
+                    JOB_PROGRESS[session_id] = {"progress": 95, "message": "Pushing all assets to Cloud Storage..."}
                     
                     s3_key = f"heatmap_asset_{session_id}.glb"
-                    print(f"[{session_id}] Uploading Heatmap to AWS '{config.AWS_S3_BUCKET_NAME}'...")
+                    print(f"[{session_id}] Uploading combined heatmap to AWS '{config.AWS_S3_BUCKET_NAME}'...")
                     s3_client.upload_file(
                         final_heatmap_path,
                         config.AWS_S3_BUCKET_NAME,
@@ -300,14 +389,15 @@ def generate_heatmap():
                         ExtraArgs={'ContentType': 'model/gltf-binary'}
                     )
                     
-                    import urllib.request
+                    # Send enriched webhook with iteration data
                     payload = json.dumps({
                         "s3_key": s3_key,
                         "job_type": "heatmap",
-                        "session_id": session_id
+                        "session_id": session_id,
+                        "iterations": iteration_data
                     }).encode('utf-8')
                     
-                    print(f"[{session_id}] Upload complete. Passing webhook signal downstream...")
+                    print(f"[{session_id}] Upload complete. Sending enriched webhook with {len(iteration_data)} iterations...")
                     req = urllib.request.Request(webhook_url, data=payload)
                     req.add_header('Content-Type', 'application/json')
                     req.add_header('X-Session-Id', session_id)

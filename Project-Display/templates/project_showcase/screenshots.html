@@ -944,8 +944,94 @@
                             <div class="hm-ref-label"><i class="fas fa-image me-1"></i>Reference Input</div>
                         </div>
 
-                        {% if art.is_user_generated %}
-                        <!-- User-Generated: Direct 3D Model + Heatmap Side-by-Side -->
+                        {% if art.is_user_generated and art.iterations %}
+                        <!-- User-Generated WITH iterations: Full Comparison UI -->
+                        <div>
+                            <div class="hm-dual-panel">
+                                <!-- Panel A -->
+                                <div class="hm-panel">
+                                    <div class="hm-panel-header">
+                                        <span class="panel-label label-a"><i class="fas fa-circle me-1"
+                                                style="font-size:0.5rem"></i>Panel A</span>
+                                        <select class="hm-select-a" data-artifact="{{ forloop.counter }}"
+                                            onchange="updateHeatmapPanel(this, 'a')">
+                                            <option value="" selected>Select iteration…</option>
+                                            {% for iter in art.iterations %}
+                                            <option value="{{ iter.number }}">Iteration {{ iter.number }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="hm-panel-viewport" id="hm-viewport-a-{{ forloop.counter }}">
+                                        <div class="hm-panel-placeholder">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                            <span>Select iteration above</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Panel B -->
+                                <div class="hm-panel">
+                                    <div class="hm-panel-header">
+                                        <span class="panel-label label-b"><i class="fas fa-circle me-1"
+                                                style="font-size:0.5rem"></i>Panel B</span>
+                                        <select class="hm-select-b" data-artifact="{{ forloop.counter }}"
+                                            onchange="updateHeatmapPanel(this, 'b')">
+                                            <option value="" selected>Select iteration…</option>
+                                            {% for iter in art.iterations %}
+                                            <option value="{{ iter.number }}">Iteration {{ iter.number }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="hm-panel-viewport" id="hm-viewport-b-{{ forloop.counter }}">
+                                        <div class="hm-panel-placeholder">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                            <span>Select iteration above</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Iteration Timeline Strip -->
+                            <div class="hm-timeline">
+                                <div class="hm-timeline-label">
+                                    <span><i class="fas fa-stream me-1"></i>All Iterations</span>
+                                    <small>Click to select for Panel A · Shift+Click for Panel B</small>
+                                </div>
+                                <div class="hm-timeline-strip" id="hm-strip-{{ forloop.counter }}">
+                                    {% for iter in art.iterations %}
+                                    <div class="hm-iter-thumb" data-iter="{{ iter.number }}"
+                                        data-artifact="{{ forloop.parentloop.counter }}"
+                                        onclick="selectIterThumb(event, this)">
+                                        <div class="hm-iter-thumb-img">
+                                            <div
+                                                style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08));">
+                                                <i class="fas fa-fire"
+                                                    style="color:rgba(102,126,234,0.3);font-size:0.9rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="hm-iter-thumb-num">#{{ iter.number }}</div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Quality Evolution Bar -->
+                            <div class="hm-quality-bar">
+                                <label><i class="fas fa-chart-line me-1"></i>Quality:</label>
+                                <div style="flex:1;">
+                                    <div class="hm-quality-track">
+                                        <div class="hm-quality-fill" style="width: 100%;"></div>
+                                    </div>
+                                    <div class="hm-quality-markers">
+                                        <span>Iter 1 (initial)</span>
+                                        <span>Iter {{ art.iteration_count }} (final)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% elif art.is_user_generated %}
+                        <!-- User-Generated WITHOUT iterations: Simple 3D + Heatmap Side-by-Side -->
                         <div>
                             <div class="hm-dual-panel">
                                 <!-- Panel A: 3D Model -->
@@ -1201,7 +1287,11 @@
             heatmapGlb: "{% if art.heatmap_glb %}{{ art.heatmap_glb }}{% endif %}",
                 iterations: [
                     {% for iter in art.iterations %}
+                    {% if art.is_user_generated %}
+    { number: {{ iter.number }}, glb: "{{ iter.glb_path }}", hm_glb: "{% if iter.heatmap_glb %}{{ iter.heatmap_glb }}{% endif %}" },
+                    {% else %}
     { number: {{ iter.number }}, glb: "{% static iter.glb_path %}", hm_glb: "{% static 'comparison/' %}{{ art.slug }}/iter_{{ iter.number }}.glb" },
+                    {% endif %}
     {% endfor %}
             ]
         },

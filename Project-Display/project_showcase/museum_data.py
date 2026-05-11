@@ -114,6 +114,7 @@ def get_museum_artifacts():
     # Automatically ingest User-Generated content actively stored by Lightning AI webhook uploads
     outputs_dir = os.path.join(settings.BASE_DIR, 'media', 'Outputs')
     if os.path.isdir(outputs_dir):
+        import re
         for f in reversed(sorted(os.listdir(outputs_dir))):  # Show newest first
             if f.startswith('asset_3d_') and f.endswith('.glb'):
                 session_id = f[9:-4]
@@ -133,6 +134,29 @@ def get_museum_artifacts():
                 heatmap_path = os.path.join(outputs_dir, f"asset_heatmap_{session_id}.glb")
                 has_heatmap = os.path.exists(heatmap_path)
                 
+                # Discover per-iteration GLBs and heatmaps
+                user_iterations = []
+                for out_f in os.listdir(outputs_dir):
+                    match = re.match(r'asset_iter_' + re.escape(session_id) + r'_(\d+)\.glb', out_f)
+                    if match:
+                        iter_num = int(match.group(1))
+                        iter_glb = f"{settings.MEDIA_URL.rstrip('/')}/Outputs/asset_iter_{session_id}_{iter_num}.glb"
+                        
+                        # Check for per-iteration heatmap
+                        itermap_filename = f"asset_itermap_{session_id}_{iter_num}.glb"
+                        iter_hm = None
+                        if os.path.exists(os.path.join(outputs_dir, itermap_filename)):
+                            iter_hm = f"{settings.MEDIA_URL.rstrip('/')}/Outputs/{itermap_filename}"
+                        
+                        user_iterations.append({
+                            'number': iter_num,
+                            'glb_path': iter_glb,
+                            'heatmap_glb': iter_hm,
+                            'input_path': f"{settings.MEDIA_URL.rstrip('/')}/Outputs/{img_filename}",
+                        })
+                
+                user_iterations.sort(key=lambda x: x['number'])
+                
                 user_artifact = {
                     'session_id': session_id,
                     'name': f"Live Generation ({session_id})",
@@ -141,8 +165,8 @@ def get_museum_artifacts():
                     'input_image': f"{settings.MEDIA_URL.rstrip('/')}/Outputs/{img_filename}",
                     'best_glb': f"{settings.MEDIA_URL.rstrip('/')}/Outputs/asset_3d_{session_id}.glb",
                     'heatmap_glb': f"{settings.MEDIA_URL.rstrip('/')}/Outputs/asset_heatmap_{session_id}.glb" if has_heatmap else None,
-                    'iterations': [],
-                    'iteration_count': 1,
+                    'iterations': user_iterations,
+                    'iteration_count': max(len(user_iterations), 1),
                 }
                 # Insert newly generated elements at the front of the gallery
                 artifacts.insert(0, user_artifact)
