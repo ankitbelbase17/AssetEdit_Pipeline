@@ -349,10 +349,23 @@ def edit_image(request):
                 else:
                     return JsonResponse({'success': False, 'error': result.get('error', 'Backend edit failed')}, status=500)
 
+        except urllib.error.HTTPError as e:
+            # Read the error response body for diagnostics
+            error_body = ''
+            try:
+                error_body = e.read().decode('utf-8')[:500]
+            except Exception:
+                pass
+            print(f"[ImageEdit] HTTP Error {e.code}: {error_body}")
+            return JsonResponse({'success': False, 'error': f'Backend returned HTTP {e.code}: {error_body[:200]}'}, status=500)
+
         except urllib.error.URLError as e:
-            return JsonResponse({'success': False, 'error': f'Failed to reach backend edit API: {str(e)}'}, status=500)
+            print(f"[ImageEdit] URL Error: {e}")
+            return JsonResponse({'success': False, 'error': f'Failed to reach backend: {str(e)}'}, status=500)
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
