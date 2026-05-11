@@ -367,29 +367,33 @@ def generate_heatmap():
                 import glob as glob_mod
                 import urllib.request
                 
-                s3_client = get_s3_client()
+                use_s3 = not getattr(config, "BYPASS_S3_UPLOAD", False)
+                s3_client = get_s3_client() if use_s3 else None
                 iteration_data = []
                 
                 # ── Step A: Upload individual iteration GLBs ──
-                JOB_PROGRESS[session_id] = {"progress": 65, "message": "Uploading individual iteration meshes..."}
-                print(f"[{session_id}] Thread: Uploading individual iteration GLBs...")
-                
-                iter_glbs = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", f"{stem}_texture.glb")))
-                if not iter_glbs:
-                    iter_glbs = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", f"{stem}_shape.glb")))
-                
-                for glb_path in iter_glbs:
-                    folder = os.path.basename(os.path.dirname(glb_path))
-                    parts = folder.rsplit('_', 1)
-                    if len(parts) == 2 and parts[1].isdigit():
-                        iter_num = int(parts[1])
-                        iter_s3_key = f"iter_{session_id}_{iter_num}.glb"
-                        try:
-                            s3_client.upload_file(glb_path, config.AWS_S3_BUCKET_NAME, iter_s3_key, ExtraArgs={'ContentType': 'model/gltf-binary'})
-                            iteration_data.append({"number": iter_num, "glb_key": iter_s3_key})
-                            print(f"[{session_id}]   Uploaded iteration {iter_num} GLB → {iter_s3_key}")
-                        except Exception as e:
-                            print(f"[{session_id}]   Failed to upload iteration {iter_num}: {e}")
+                if use_s3:
+                    JOB_PROGRESS[session_id] = {"progress": 65, "message": "Uploading individual iteration meshes..."}
+                    print(f"[{session_id}] Thread: Uploading individual iteration GLBs...")
+                    
+                    iter_glbs = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", f"{stem}_texture.glb")))
+                    if not iter_glbs:
+                        iter_glbs = sorted(glob_mod.glob(os.path.join(input_dir, f"{stem}_*", f"{stem}_shape.glb")))
+                    
+                    for glb_path in iter_glbs:
+                        folder = os.path.basename(os.path.dirname(glb_path))
+                        parts = folder.rsplit('_', 1)
+                        if len(parts) == 2 and parts[1].isdigit():
+                            iter_num = int(parts[1])
+                            iter_s3_key = f"iter_{session_id}_{iter_num}.glb"
+                            try:
+                                s3_client.upload_file(glb_path, config.AWS_S3_BUCKET_NAME, iter_s3_key, ExtraArgs={'ContentType': 'model/gltf-binary'})
+                                iteration_data.append({"number": iter_num, "glb_key": iter_s3_key})
+                                print(f"[{session_id}]   Uploaded iteration {iter_num} GLB → {iter_s3_key}")
+                            except Exception as e:
+                                print(f"[{session_id}]   Failed to upload iteration {iter_num}: {e}")
+                else:
+                    print(f"[{session_id}] Thread: Skipping iteration uploads (S3 bypass enabled).")
                 
                 # ── Step B: Compute per-iteration heatmaps ──
                 JOB_PROGRESS[session_id] = {"progress": 75, "message": "Computing per-iteration topology maps..."}
@@ -436,14 +440,17 @@ def generate_heatmap():
                                 hm_path = os.path.join(config.OUTPUT_DIR, f"itermap_{session_id}_{it_m['number']}.glb")
                                 it_m['mesh'].export(hm_path)
                                 
-                                hm_s3_key = f"itermap_{session_id}_{it_m['number']}.glb"
-                                s3_client.upload_file(hm_path, config.AWS_S3_BUCKET_NAME, hm_s3_key, ExtraArgs={'ContentType': 'model/gltf-binary'})
-                                
-                                for d in iteration_data:
-                                    if d['number'] == it_m['number']:
-                                        d['heatmap_key'] = hm_s3_key
-                                        break
-                                print(f"[{session_id}]   Computed + uploaded heatmap for iteration {it_m['number']}")
+                                if use_s3:
+                                    hm_s3_key = f"itermap_{session_id}_{it_m['number']}.glb"
+                                    s3_client.upload_file(hm_path, config.AWS_S3_BUCKET_NAME, hm_s3_key, ExtraArgs={'ContentType': 'model/gltf-binary'})
+                                    
+                                    for d in iteration_data:
+                                        if d['number'] == it_m['number']:
+                                            d['heatmap_key'] = hm_s3_key
+                                            break
+                                    print(f"[{session_id}]   Computed + uploaded heatmap for iteration {it_m['number']}")
+                                else:
+                                    print(f"[{session_id}]   Computed heatmap for iteration {it_m['number']} (upload skipped)")
                             except Exception as e:
                                 print(f"[{session_id}]   Failed heatmap for iteration {it_m['number']}: {e}")
                     else:
@@ -464,26 +471,37 @@ def generate_heatmap():
                 proc2.wait()
                 
                 if os.path.exists(final_heatmap_path):
-                    JOB_PROGRESS[session_id] = {"progress": 95, "message": "Pushing all assets to Cloud Storage..."}
-                    
-                    s3_key = f"heatmap_asset_{session_id}.glb"
-                    print(f"[{session_id}] Uploading combined heatmap to AWS '{config.AWS_S3_BUCKET_NAME}'...")
-                    s3_client.upload_file(
-                        final_heatmap_path,
-                        config.AWS_S3_BUCKET_NAME,
-                        s3_key,
-                        ExtraArgs={'ContentType': 'model/gltf-binary'}
-                    )
-                    
-                    # Send enriched webhook with iteration data
-                    payload = json.dumps({
-                        "s3_key": s3_key,
-                        "job_type": "heatmap",
-                        "session_id": session_id,
-                        "iterations": iteration_data
-                    }).encode('utf-8')
-                    
-                    print(f"[{session_id}] Upload complete. Sending enriched webhook with {len(iteration_data)} iterations...")
+                    if use_s3:
+                        JOB_PROGRESS[session_id] = {"progress": 95, "message": "Pushing all assets to Cloud Storage..."}
+                        
+                        s3_key = f"heatmap_asset_{session_id}.glb"
+                        print(f"[{session_id}] Uploading combined heatmap to AWS '{config.AWS_S3_BUCKET_NAME}'...")
+                        s3_client.upload_file(
+                            final_heatmap_path,
+                            config.AWS_S3_BUCKET_NAME,
+                            s3_key,
+                            ExtraArgs={'ContentType': 'model/gltf-binary'}
+                        )
+                        
+                        # Send enriched webhook with iteration data
+                        payload = json.dumps({
+                            "s3_key": s3_key,
+                            "job_type": "heatmap",
+                            "session_id": session_id,
+                            "iterations": iteration_data
+                        }).encode('utf-8')
+                        
+                        print(f"[{session_id}] Upload complete. Sending enriched webhook with {len(iteration_data)} iterations...")
+                    else:
+                        JOB_PROGRESS[session_id] = {"progress": 95, "message": "Finalizing heatmap asset..."}
+                        rel_path = os.path.relpath(final_heatmap_path, config.OUTPUT_DIR).replace(os.sep, '/')
+                        payload = json.dumps({
+                            "asset_path": rel_path,
+                            "job_type": "heatmap",
+                            "session_id": session_id
+                        }).encode('utf-8')
+                        
+                        print(f"[{session_id}] Heatmap ready. Sending direct asset path: {rel_path}")
                     req = urllib.request.Request(webhook_url, data=payload)
                     req.add_header('Content-Type', 'application/json')
                     req.add_header('X-Session-Id', session_id)
