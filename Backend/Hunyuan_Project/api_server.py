@@ -7,8 +7,10 @@ import shutil
 import threading
 import re
 import json
+import io
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from PIL import Image
 import config
 import boto3
 
@@ -17,6 +19,27 @@ app = Flask(__name__)
 CORS(app)
 
 JOB_PROGRESS = {}
+
+# ─── QWEN IMAGE EDIT PIPELINE (lazy loaded) ──────────────────────────────────
+_qwen_pipeline = None
+_qwen_lock = threading.Lock()
+
+def get_qwen_pipeline():
+    """Lazily loads and returns the Qwen Image Edit pipeline. Thread-safe."""
+    global _qwen_pipeline
+    if _qwen_pipeline is None:
+        with _qwen_lock:
+            if _qwen_pipeline is None:
+                import torch
+                from diffusers import QwenImageEditPlusPipeline
+                print("[Qwen] Loading Qwen-Image-Edit-2509 pipeline...")
+                _qwen_pipeline = QwenImageEditPlusPipeline.from_pretrained(
+                    "Qwen/Qwen-Image-Edit-2509", torch_dtype=torch.bfloat16
+                )
+                _qwen_pipeline.to('cuda')
+                _qwen_pipeline.set_progress_bar_config(disable=None)
+                print("[Qwen] Pipeline loaded and ready on CUDA.")
+    return _qwen_pipeline
 
 # ─── S3 HELPER ──────────────────────────────────────────────────────────────
 _s3_bucket_verified = False
@@ -441,6 +464,77 @@ def get_job_status(session_id):
         return jsonify({"success": True, "status": JOB_PROGRESS[session_id]})
     return jsonify({"success": False, "error": "Session Not Tracked (Might have instantly cached)"})
 
+
+
+# ─── IMAGE EDITING (QWEN) ────────────────────────────────────────────────────
+
+@app.route('/api/edit-image', methods=['POST'])
+def edit_image():
+    """
+    Receives a base64-encoded image and a text prompt, runs Qwen Image Edit,
+    and returns the edited image as a base64 data URL.
+    """
+    try:
+        import torch
+
+        data = request.json
+        image_data = data.get('image')
+        prompt = data.get('prompt', '')
+        seed = data.get('seed', 0)
+
+        if not image_data:
+            return jsonify({'success': False, 'error': 'No image data provided'}), 400
+        if not prompt.strip():
+            return jsonify({'success': False, 'error': 'No edit prompt provided'}), 400
+
+        # Decode the incoming base64 image
+        if ';base64,' in image_data:
+            _, img_str = image_data.split(';base64,')
+        else:
+            img_str = image_data
+
+        img_bytes = base64.b64decode(img_str)
+        input_image = Image.open(io.BytesIO(img_bytes)).convert('RGB')
+
+        print(f"[Qwen] Edit request received. Prompt: '{prompt}' | Image size: {input_image.size}")
+
+        # Load pipeline (lazy)
+        pipeline = get_qwen_pipeline()
+
+        inputs = {
+            "image": [input_image],
+            "prompt": prompt,
+            "generator": torch.manual_seed(int(seed)),
+            "true_cfg_scale": 4.0,
+            "negative_prompt": " ",
+            "num_inference_steps": 40,
+            "guidance_scale": 1.0,
+            "num_images_per_prompt": 1,
+        }
+
+        with torch.inference_mode():
+            output = pipeline(**inputs)
+            output_image = output.images[0]
+
+        # Convert output image to base64
+        buffer = io.BytesIO()
+        output_image.save(buffer, format='PNG')
+        buffer.seek(0)
+        encoded = base64.b64encode(buffer.read()).decode('utf-8')
+        result_data_url = f"data:image/png;base64,{encoded}"
+
+        print(f"[Qwen] Edit complete. Output size: {output_image.size}")
+
+        return jsonify({
+            'success': True,
+            'edited_image': result_data_url,
+            'message': 'Image edited successfully'
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ─── RUN SERVER & EXPOSE TUNNEL ──────────────────────────────────────────────
