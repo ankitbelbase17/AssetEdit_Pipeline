@@ -514,15 +514,28 @@ def edit_image():
 
                 EDIT_RESULTS[edit_id] = {"status": "processing", "progress": 30, "message": "Running AI image edit (this takes ~1-2 min)..."}
 
+                num_steps = 40
+
+                # Callback to report per-step diffusion progress (30% → 90%)
+                def step_callback(pipe, step_index, timestep, callback_kwargs):
+                    progress = 30 + int((step_index + 1) / num_steps * 60)  # Maps 0..39 → 30..90
+                    EDIT_RESULTS[edit_id] = {
+                        "status": "processing",
+                        "progress": progress,
+                        "message": f"Diffusion step {step_index + 1}/{num_steps}..."
+                    }
+                    return callback_kwargs
+
                 inputs = {
                     "image": [input_image],
                     "prompt": prompt,
                     "generator": torch.manual_seed(int(seed)),
                     "true_cfg_scale": 4.0,
                     "negative_prompt": " ",
-                    "num_inference_steps": 40,
+                    "num_inference_steps": num_steps,
                     "guidance_scale": 1.0,
                     "num_images_per_prompt": 1,
+                    "callback_on_step_end": step_callback,
                 }
 
                 with torch.inference_mode():
@@ -564,6 +577,15 @@ def edit_image():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+def _schedule_edit_cleanup(edit_id, delay=60):
+    """Schedules cleanup of a completed/error edit result after a delay.
+    This prevents the result from being lost if the frontend polls multiple times."""
+    def _cleanup():
+        EDIT_RESULTS.pop(edit_id, None)
+    timer = threading.Timer(delay, _cleanup)
+    timer.daemon = True
+    timer.start()
+
 @app.route('/api/edit-status/<edit_id>', methods=['GET'])
 def get_edit_status(edit_id):
     """
@@ -576,9 +598,9 @@ def get_edit_status(edit_id):
     result = EDIT_RESULTS[edit_id]
 
     if result["status"] == "completed":
-        # Return the result and clean up
         edited_image = result.get("edited_image", "")
-        del EDIT_RESULTS[edit_id]
+        # Schedule cleanup after 60s so retries/race conditions still get the result
+        _schedule_edit_cleanup(edit_id, delay=60)
         return jsonify({
             "success": True,
             "status": "completed",
@@ -588,7 +610,7 @@ def get_edit_status(edit_id):
         })
     elif result["status"] == "error":
         msg = result.get("message", "Unknown error")
-        del EDIT_RESULTS[edit_id]
+        _schedule_edit_cleanup(edit_id, delay=30)
         return jsonify({"success": False, "status": "error", "progress": 0, "message": msg})
     else:
         return jsonify({

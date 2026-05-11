@@ -1739,10 +1739,24 @@
 
         const btn = document.getElementById('editApplyBtn');
         const statusBar = document.querySelector('.status-bar span');
+        const progressContainer = document.querySelector('.progress-container');
+        const progressBar = document.getElementById('jobProgress');
+        const progressPct = document.getElementById('progressPercentage');
+
+        // Reset any previous edit state
+        editedImageData = null;
+        document.getElementById('editComparison').classList.remove('active');
+        document.getElementById('editUseBtn').style.display = 'none';
+        document.getElementById('editDiscardBtn').style.display = 'none';
+
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Editing...';
         statusBar.textContent = 'Sending image to Qwen AI editor...';
         document.querySelector('.status-bar .status-dot').style.background = '#f6ad55';
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressPct.style.display = 'block';
+        progressPct.textContent = '0%';
 
         // Get the image as base64
         let imgDataUrl = currentImageSrc;
@@ -1783,30 +1797,48 @@
             const editResult = await new Promise((resolve, reject) => {
                 const pollInterval = setInterval(async () => {
                     try {
-                        const statusRes = await fetch(`/api/edit-status/${editId}/`);
+                        const statusRes = await fetch(`/api/edit-status/${editId}/?t=${Date.now()}`, {
+                            cache: 'no-store'
+                        });
                         const statusData = await statusRes.json();
+                        console.log('[EditPoll]', statusData);
+
+                        const rawProgress = typeof statusData.progress === 'number' ? statusData.progress : 0;
+                        const prog = Math.min(100, Math.max(0, rawProgress));
 
                         if (statusData.status === 'completed') {
+                            if (statusData.edited_image && statusData.edited_image.startsWith('data:image')) {
+                                clearInterval(pollInterval);
+                                resolve(statusData);
+                                return;
+                            }
+                            // Backend reported completion but image payload not ready
+                            statusBar.textContent = 'Finalizing edited image...';
+                            progressBar.style.width = '95%';
+                            progressPct.textContent = '95%';
+                            return;
+                        }
+
+                        if (statusData.status === 'error' || (statusData.success === false && !statusData.status)) {
                             clearInterval(pollInterval);
-                            resolve(statusData);
-                        } else if (statusData.status === 'error') {
-                            clearInterval(pollInterval);
-                            reject(new Error(statusData.message || 'Edit failed on server'));
+                            reject(new Error(statusData.message || statusData.error || 'Edit failed on server'));
                         } else {
                             // Update progress message
-                            let prog = statusData.progress || 0;
                             let msg = statusData.message || 'Processing...';
                             statusBar.textContent = `${msg} (${prog}%)`;
+                            progressBar.style.width = `${prog}%`;
+                            progressPct.textContent = `${prog}%`;
                         }
                     } catch (err) {
                         clearInterval(pollInterval);
                         reject(err);
                     }
-                }, 2500);
+                }, 3000);
             });
 
             // Step 3: Show the result
             editedImageData = editResult.edited_image;
+            console.log('[EditResult] Got edited image, length:', editedImageData ? editedImageData.length : 0);
 
             document.getElementById('editOriginalImg').src = imgDataUrl;
             document.getElementById('editResultImg').src = editedImageData;
@@ -1816,10 +1848,16 @@
 
             statusBar.textContent = 'Edit complete! Choose to use or discard the result.';
             document.querySelector('.status-bar .status-dot').style.background = '#48bb78';
+            progressContainer.style.display = 'none';
+            progressPct.style.display = 'none';
+            progressBar.style.width = '0%';
         } catch (error) {
             console.error('Edit Error:', error);
             statusBar.textContent = 'Edit failed: ' + error.message;
             document.querySelector('.status-bar .status-dot').style.background = '#ef4444';
+            progressContainer.style.display = 'none';
+            progressPct.style.display = 'none';
+            progressBar.style.width = '0%';
             alert('Image editing failed: ' + error.message);
         } finally {
             btn.disabled = false;

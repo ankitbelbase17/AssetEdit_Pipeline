@@ -374,16 +374,25 @@ def check_edit_status(request, edit_id):
         req = urllib.request.Request(backend_endpoint)
         with urllib.request.urlopen(req, timeout=15) as response:
             result = json.loads(response.read().decode('utf-8'))
-            return JsonResponse(result)
+            proxy_response = JsonResponse(result)
+            proxy_response["Cache-Control"] = "no-store"
+            proxy_response["Pragma"] = "no-cache"
+            return proxy_response
     except urllib.error.HTTPError as e:
         error_body = ''
         try:
             error_body = e.read().decode('utf-8')[:300]
         except Exception:
             pass
-        return JsonResponse({'success': False, 'status': 'error', 'message': f'HTTP {e.code}'}, status=500)
+        proxy_response = JsonResponse({'success': False, 'status': 'error', 'message': f'HTTP {e.code}'}, status=500)
+        proxy_response["Cache-Control"] = "no-store"
+        proxy_response["Pragma"] = "no-cache"
+        return proxy_response
     except Exception as e:
-        return JsonResponse({'success': False, 'status': 'error', 'message': str(e)[:150]}, status=500)
+        proxy_response = JsonResponse({'success': False, 'status': 'error', 'message': str(e)[:150]}, status=500)
+        proxy_response["Cache-Control"] = "no-store"
+        proxy_response["Pragma"] = "no-cache"
+        return proxy_response
 
 
 @csrf_exempt
