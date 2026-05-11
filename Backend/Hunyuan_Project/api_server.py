@@ -468,15 +468,15 @@ def get_job_status(session_id):
 
 # ─── IMAGE EDITING (QWEN) ────────────────────────────────────────────────────
 
+EDIT_RESULTS = {}  # Stores edit job progress and results by edit_id
+
 @app.route('/api/edit-image', methods=['POST'])
 def edit_image():
     """
-    Receives a base64-encoded image and a text prompt, runs Qwen Image Edit,
-    and returns the edited image as a base64 data URL.
+    Accepts image + prompt, spawns a background thread for Qwen editing,
+    returns immediately with an edit_id for polling.
     """
     try:
-        import torch
-
         data = request.json
         image_data = data.get('image')
         prompt = data.get('prompt', '')
@@ -487,54 +487,116 @@ def edit_image():
         if not prompt.strip():
             return jsonify({'success': False, 'error': 'No edit prompt provided'}), 400
 
-        # Decode the incoming base64 image
-        if ';base64,' in image_data:
-            _, img_str = image_data.split(';base64,')
-        else:
-            img_str = image_data
+        edit_id = str(uuid.uuid4())[:8]
+        EDIT_RESULTS[edit_id] = {"status": "processing", "progress": 5, "message": "Queued for editing..."}
 
-        img_bytes = base64.b64decode(img_str)
-        input_image = Image.open(io.BytesIO(img_bytes)).convert('RGB')
+        print(f"[Qwen] Edit request queued as {edit_id}. Prompt: '{prompt}'")
 
-        print(f"[Qwen] Edit request received. Prompt: '{prompt}' | Image size: {input_image.size}")
+        def run_edit():
+            try:
+                import torch
 
-        # Load pipeline (lazy)
-        pipeline = get_qwen_pipeline()
+                EDIT_RESULTS[edit_id] = {"status": "processing", "progress": 10, "message": "Decoding input image..."}
 
-        inputs = {
-            "image": [input_image],
-            "prompt": prompt,
-            "generator": torch.manual_seed(int(seed)),
-            "true_cfg_scale": 4.0,
-            "negative_prompt": " ",
-            "num_inference_steps": 40,
-            "guidance_scale": 1.0,
-            "num_images_per_prompt": 1,
-        }
+                # Decode the incoming base64 image
+                if ';base64,' in image_data:
+                    _, img_str = image_data.split(';base64,')
+                else:
+                    img_str = image_data
 
-        with torch.inference_mode():
-            output = pipeline(**inputs)
-            output_image = output.images[0]
+                img_bytes = base64.b64decode(img_str)
+                input_image = Image.open(io.BytesIO(img_bytes)).convert('RGB')
 
-        # Convert output image to base64
-        buffer = io.BytesIO()
-        output_image.save(buffer, format='PNG')
-        buffer.seek(0)
-        encoded = base64.b64encode(buffer.read()).decode('utf-8')
-        result_data_url = f"data:image/png;base64,{encoded}"
+                print(f"[Qwen][{edit_id}] Image decoded. Size: {input_image.size}")
+                EDIT_RESULTS[edit_id] = {"status": "processing", "progress": 20, "message": "Loading Qwen AI model..."}
 
-        print(f"[Qwen] Edit complete. Output size: {output_image.size}")
+                pipeline = get_qwen_pipeline()
+
+                EDIT_RESULTS[edit_id] = {"status": "processing", "progress": 30, "message": "Running AI image edit (this takes ~1-2 min)..."}
+
+                inputs = {
+                    "image": [input_image],
+                    "prompt": prompt,
+                    "generator": torch.manual_seed(int(seed)),
+                    "true_cfg_scale": 4.0,
+                    "negative_prompt": " ",
+                    "num_inference_steps": 40,
+                    "guidance_scale": 1.0,
+                    "num_images_per_prompt": 1,
+                }
+
+                with torch.inference_mode():
+                    output = pipeline(**inputs)
+                    output_image = output.images[0]
+
+                EDIT_RESULTS[edit_id] = {"status": "processing", "progress": 90, "message": "Encoding result..."}
+
+                buffer = io.BytesIO()
+                output_image.save(buffer, format='PNG')
+                buffer.seek(0)
+                encoded = base64.b64encode(buffer.read()).decode('utf-8')
+                result_data_url = f"data:image/png;base64,{encoded}"
+
+                print(f"[Qwen][{edit_id}] Edit complete. Output size: {output_image.size}")
+
+                EDIT_RESULTS[edit_id] = {
+                    "status": "completed",
+                    "progress": 100,
+                    "message": "Edit complete!",
+                    "edited_image": result_data_url
+                }
+
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print(f"[Qwen][{edit_id}] Edit failed: {e}")
+                EDIT_RESULTS[edit_id] = {"status": "error", "progress": 0, "message": str(e)[:200]}
+
+        threading.Thread(target=run_edit, daemon=True).start()
 
         return jsonify({
             'success': True,
-            'edited_image': result_data_url,
-            'message': 'Image edited successfully'
+            'edit_id': edit_id,
+            'message': 'Image editing started'
         })
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/edit-status/<edit_id>', methods=['GET'])
+def get_edit_status(edit_id):
+    """
+    Polling endpoint for image edit progress. Returns the edited image
+    as base64 when complete.
+    """
+    if edit_id not in EDIT_RESULTS:
+        return jsonify({"success": False, "error": "Edit job not found"}), 404
+
+    result = EDIT_RESULTS[edit_id]
+
+    if result["status"] == "completed":
+        # Return the result and clean up
+        edited_image = result.get("edited_image", "")
+        del EDIT_RESULTS[edit_id]
+        return jsonify({
+            "success": True,
+            "status": "completed",
+            "progress": 100,
+            "message": "Edit complete!",
+            "edited_image": edited_image
+        })
+    elif result["status"] == "error":
+        msg = result.get("message", "Unknown error")
+        del EDIT_RESULTS[edit_id]
+        return jsonify({"success": False, "status": "error", "progress": 0, "message": msg})
+    else:
+        return jsonify({
+            "success": True,
+            "status": "processing",
+            "progress": result.get("progress", 0),
+            "message": result.get("message", "Processing...")
+        })
 
 
 # ─── RUN SERVER & EXPOSE TUNNEL ──────────────────────────────────────────────

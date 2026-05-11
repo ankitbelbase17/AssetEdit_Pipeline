@@ -306,8 +306,8 @@ def generate_3d(request):
 @require_POST
 def edit_image(request):
     """
-    Proxies an image editing request to the remote backend's Qwen Image Edit pipeline.
-    Receives base64 image + text prompt, returns the edited image as base64.
+    Submits an async image editing job to the remote backend.
+    Returns an edit_id that the frontend polls via check_edit_status.
     """
     try:
         data = json.loads(request.body)
@@ -320,7 +320,7 @@ def edit_image(request):
         if not prompt.strip():
             return JsonResponse({'success': False, 'error': 'No edit prompt provided'}, status=400)
 
-        print(f"\n[ImageEdit] 🎨 Dispatching image edit to Remote Backend. Prompt: '{prompt[:60]}...'")
+        print(f"\n[ImageEdit] 🎨 Dispatching async image edit. Prompt: '{prompt[:60]}...'")
 
         payload = {
             'image': image_data,
@@ -336,37 +336,54 @@ def edit_image(request):
                 data=json.dumps(payload).encode('utf-8'),
                 headers={'Content-Type': 'application/json'}
             )
-            # Image editing can take a while (up to ~2 minutes for 40 inference steps)
-            with urllib.request.urlopen(req, timeout=300) as response:
+            with urllib.request.urlopen(req, timeout=60) as response:
                 result = json.loads(response.read().decode('utf-8'))
 
                 if result.get('success'):
                     return JsonResponse({
                         'success': True,
-                        'edited_image': result['edited_image'],
-                        'message': result.get('message', 'Image edited successfully')
+                        'edit_id': result['edit_id'],
+                        'message': 'Image editing started'
                     })
                 else:
                     return JsonResponse({'success': False, 'error': result.get('error', 'Backend edit failed')}, status=500)
 
         except urllib.error.HTTPError as e:
-            # Read the error response body for diagnostics
             error_body = ''
             try:
                 error_body = e.read().decode('utf-8')[:500]
             except Exception:
                 pass
-            print(f"[ImageEdit] HTTP Error {e.code}: {error_body}")
-            return JsonResponse({'success': False, 'error': f'Backend returned HTTP {e.code}: {error_body[:200]}'}, status=500)
+            return JsonResponse({'success': False, 'error': f'Backend HTTP {e.code}: {error_body[:200]}'}, status=500)
 
         except urllib.error.URLError as e:
-            print(f"[ImageEdit] URL Error: {e}")
             return JsonResponse({'success': False, 'error': f'Failed to reach backend: {str(e)}'}, status=500)
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def check_edit_status(request, edit_id):
+    """
+    Polls the remote backend for image edit progress/result.
+    """
+    try:
+        backend_endpoint = f"{HUNYUAN_BACKEND_URL.rstrip('/')}/api/edit-status/{edit_id}"
+        req = urllib.request.Request(backend_endpoint)
+        with urllib.request.urlopen(req, timeout=15) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            return JsonResponse(result)
+    except urllib.error.HTTPError as e:
+        error_body = ''
+        try:
+            error_body = e.read().decode('utf-8')[:300]
+        except Exception:
+            pass
+        return JsonResponse({'success': False, 'status': 'error', 'message': f'HTTP {e.code}'}, status=500)
+    except Exception as e:
+        return JsonResponse({'success': False, 'status': 'error', 'message': str(e)[:150]}, status=500)
 
 
 @csrf_exempt

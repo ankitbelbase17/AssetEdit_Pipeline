@@ -1763,6 +1763,7 @@
         }
 
         try {
+            // Step 1: Submit the edit job (returns immediately with edit_id)
             const response = await fetch('{% url "project_showcase:edit_image" %}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1770,21 +1771,51 @@
             });
             const data = await response.json();
 
-            if (data.success) {
-                editedImageData = data.edited_image;
-
-                // Show before/after comparison
-                document.getElementById('editOriginalImg').src = imgDataUrl;
-                document.getElementById('editResultImg').src = editedImageData;
-                document.getElementById('editComparison').classList.add('active');
-                document.getElementById('editUseBtn').style.display = 'inline-flex';
-                document.getElementById('editDiscardBtn').style.display = 'inline-flex';
-
-                statusBar.textContent = 'Edit complete! Choose to use or discard the result.';
-                document.querySelector('.status-bar .status-dot').style.background = '#48bb78';
-            } else {
-                throw new Error(data.error || 'Image editing failed');
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to submit edit job');
             }
+
+            const editId = data.edit_id;
+            statusBar.textContent = 'Edit job submitted. AI is processing...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI Editing...';
+
+            // Step 2: Poll for completion
+            const editResult = await new Promise((resolve, reject) => {
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const statusRes = await fetch(`/api/edit-status/${editId}/`);
+                        const statusData = await statusRes.json();
+
+                        if (statusData.status === 'completed') {
+                            clearInterval(pollInterval);
+                            resolve(statusData);
+                        } else if (statusData.status === 'error') {
+                            clearInterval(pollInterval);
+                            reject(new Error(statusData.message || 'Edit failed on server'));
+                        } else {
+                            // Update progress message
+                            let prog = statusData.progress || 0;
+                            let msg = statusData.message || 'Processing...';
+                            statusBar.textContent = `${msg} (${prog}%)`;
+                        }
+                    } catch (err) {
+                        clearInterval(pollInterval);
+                        reject(err);
+                    }
+                }, 2500);
+            });
+
+            // Step 3: Show the result
+            editedImageData = editResult.edited_image;
+
+            document.getElementById('editOriginalImg').src = imgDataUrl;
+            document.getElementById('editResultImg').src = editedImageData;
+            document.getElementById('editComparison').classList.add('active');
+            document.getElementById('editUseBtn').style.display = 'inline-flex';
+            document.getElementById('editDiscardBtn').style.display = 'inline-flex';
+
+            statusBar.textContent = 'Edit complete! Choose to use or discard the result.';
+            document.querySelector('.status-bar .status-dot').style.background = '#48bb78';
         } catch (error) {
             console.error('Edit Error:', error);
             statusBar.textContent = 'Edit failed: ' + error.message;

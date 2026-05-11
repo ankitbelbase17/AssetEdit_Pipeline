@@ -28,6 +28,7 @@ urlpatterns = [
     path('contact/submit/', views.contact_submit, name='contact_submit'),
     path('api/generate-3d/', views.generate_3d, name='generate_3d'),
     path('api/edit-image/', views.edit_image, name='edit_image'),
+    path('api/edit-status/<str:edit_id>/', views.check_edit_status, name='check_edit_status'),
     path('api/generate-heatmap/', views.generate_heatmap, name='generate_heatmap'),
     path('api/webhook/receive/', views.receive_webhook, name='receive_webhook'),
     path('api/delete/<str:session_id>/', views.delete_asset_view, name='delete_asset'),
